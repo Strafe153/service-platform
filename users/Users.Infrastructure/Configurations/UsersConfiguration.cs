@@ -10,6 +10,8 @@ public class UsersConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(b => b.Id);
 
+        builder.Property(b => b.Id).HasMaxLength(26);
+
         builder.Property(b => b.Id).HasConversion(
             u => u.ToString(),
             s => Ulid.Parse(s));
@@ -36,8 +38,9 @@ public class UsersConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(36)
             .IsRequired();
 
-        builder.ComplexProperty(b => b.Address);
-        // builder.OwnsOne(b => b.Address, o => o.ToTable("Addresses"));
+        builder.OwnsOne(
+            b => b.Address,
+            o => o.ToTable("Addresses"));
 
         builder.ToTable("Users");
     }
