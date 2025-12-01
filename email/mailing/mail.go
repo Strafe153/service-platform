@@ -74,20 +74,17 @@ func getEmailBody[T any](msg *MailMessage[T]) (*bytes.Buffer, error) {
 }
 
 func (m *MailMessage[T]) Send() error {
-	fmt.Println("inside send")
 	cfg, err := readConfig()
 
 	if err != nil {
 		return err
 	}
-	fmt.Println("after the first if")
 
 	body, err := getEmailBody(m)
 
 	if err != nil {
 		return err
 	}
-	fmt.Println("after the second if")
 
 	msg := gomail.NewMessage()
 
