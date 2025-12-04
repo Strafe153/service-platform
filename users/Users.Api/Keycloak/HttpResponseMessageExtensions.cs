@@ -1,7 +1,6 @@
 using Keycloak.AuthServices.Common;
-using Users.Api.Application.Commands.Create;
 
-namespace Users.Api.Extensions;
+namespace Users.Api.Keycloak;
 
 public static class HttpResponsemessageExtensions
 {

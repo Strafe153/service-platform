@@ -1,6 +1,6 @@
 using MediatR;
-using Users.Domain.Aggregates.User;
+using Users.Api.Application.Queries.Dto;
 
 namespace Users.Api.Application.Queries.GetById;
 
-public sealed record GetUserByIdQuery(int Id) : IRequest<User>;
+public sealed record GetUserByIdQuery(Ulid Id) : IRequest<UserReadDto>;

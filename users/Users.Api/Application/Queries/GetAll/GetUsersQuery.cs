@@ -1,6 +1,8 @@
 using MediatR;
-using Users.Domain.Aggregates.User;
+using Users.Api.Application.Queries.Dto;
 
 namespace Users.Api.Application.Queries.GetAll;
 
-public class GetUsersRequest : IRequest<List<User>>;
+public record GetUsersRequest(
+    int PageNumber,
+    int PageSize) : IRequest<PageDto<UserReadDto>>;

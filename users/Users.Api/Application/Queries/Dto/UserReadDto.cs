@@ -1,4 +1,4 @@
-namespace Users.Api.Application.Queries;
+namespace Users.Api.Application.Queries.Dto;
 
 public sealed record UserReadDto(
     Ulid Id,
@@ -6,5 +6,5 @@ public sealed record UserReadDto(
     string FirstName,
     string LastName,
     string PhoneNumber,
-    DateOnly BirthDate
-);
+    DateOnly BirthDate,
+    AddressReadDto Address);

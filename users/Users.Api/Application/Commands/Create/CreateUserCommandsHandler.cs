@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Sdk.Admin;
 using Keycloak.AuthServices.Sdk.Admin.Models;
@@ -7,19 +6,13 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using Users.Api.Application.Queries;
-using Users.Api.Extensions;
+using Users.Api.Application.Queries.Dto;
+using Users.Api.Keycloak;
 using Users.Api.Mapping;
 using Users.Domain.Aggregates.User;
 using Users.Domain.Events;
 
 namespace Users.Api.Application.Commands.Create;
-
-public sealed class KeycloakErrorResponse
-{
-    [JsonPropertyName("error")]
-    public string Error { get; set; } = default!;
-}
 
 public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserReadDto>
 {
@@ -56,19 +49,18 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
 
             await userResponse.ThrowIfNotSuccessKeycloakStatusCode(cancellationToken);
 
-            if (userResponse.Headers.TryGetValues(HeaderNames.Location, out var locationHeaders))
+            if (!userResponse.Headers.TryGetValues(HeaderNames.Location, out var locationHeaders))
             {
-                userId = locationHeaders.First().Split('/')[^1];
-                await SetUserPasswordAsync(request, userId, cancellationToken);
-
-                var user = await SaveUserAsync(request, userId, cancellationToken);
-                await PublishUserCreatedEvent(request, cancellationToken);
-
-                return user.ToReadDto();
+                throw new ArgumentException("No 'Location' header was returned from Keycloak.");
             }
 
-            // check what the response looks like
-            throw new ArgumentNullException(userId, "No location header was returned from Keycloak.");
+            userId = locationHeaders.First().Split('/')[^1];
+            await SetUserPasswordAsync(request, userId, cancellationToken);
+
+            var user = await SaveUserAsync(request, userId, cancellationToken);
+            await PublishUserCreatedEvent(request, cancellationToken);
+
+            return user.ToReadDto();
         }
         catch (DbUpdateException)
         {
