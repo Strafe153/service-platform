@@ -1,4 +1,4 @@
-namespace Users.Api;
+namespace Users.Api.Configurations;
 
 public static class ConfigConstants
 {

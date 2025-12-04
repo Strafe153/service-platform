@@ -1,7 +1,7 @@
-using MediatR;
+using Users.Api;
 using Users.Api.Configurations;
-using Users.Api.Application.Commands.Create;
-using Users.Api.Application.Queries.GetAll;
+using Users.Api.Configurations.Authorization;
+using Users.Api.Endpoints;
 using Users.Domain.Aggregates.User;
 using Users.Infrastructure.Repositories;
 
@@ -16,6 +16,8 @@ builder.Services.ConfigureMassTransit(builder.Configuration);
 
 builder.Services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+builder.Services.AddExceptionHandler<ExceptionHandler>();
+
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
 var app = builder.Build();
@@ -28,18 +30,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("users", (ISender sender, CancellationToken token) =>
-{
-    var users = sender.Send(new GetUsersRequest(), token);
-    return TypedResults.Ok(users);
-}).RequireAuthorization("admin-only");
+app.UseExceptionHandler(_ => {});
 
-app.MapPost("users", async (ISender sender, CreateUserCommand command, CancellationToken token) =>
-{
-    var user = await sender.Send(command, token);
-    // get by id doesn't exist yet
-    return TypedResults.CreatedAtRoute(user, "Get", new { id = user.Id });
-});
+app.RegisterUserEndpoints();
 
 await app.RunDatabaseMigrations();
 

@@ -16,6 +16,8 @@ public sealed class User : Entity<Ulid>, IAggregateRoot
 
     public Address Address { get; private set; }
 
+    // This constructor is needed for EF to run migrations,
+    // however the warnings appear due to properties not being set in here
 #pragma warning disable CS8618
     private User() : base(Ulid.NewUlid())
     {
@@ -39,4 +41,24 @@ public sealed class User : Entity<Ulid>, IAggregateRoot
         AuthProviderId = authProviderId;
         Address = address;
     }
+
+    public void Update(
+        string firstName,
+        string lastName,
+        string phoneNumber,
+        DateOnly birthDate)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        PhoneNumber = phoneNumber;
+        BirthDate = birthDate;
+    }
+
+    public void UpdateAddress(
+        string country,
+        string state,
+        string city,
+        string zipCode,
+        string? street) =>
+            Address = new(country, state, city, zipCode, street);
 }

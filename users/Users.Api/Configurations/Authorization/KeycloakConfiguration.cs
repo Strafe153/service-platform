@@ -3,8 +3,9 @@ using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
+using Microsoft.AspNetCore.Authorization;
 
-namespace Users.Api.Configurations;
+namespace Users.Api.Configurations.Authorization;
 
 public static class KeycloakConfigurations
 {
@@ -17,16 +18,39 @@ public static class KeycloakConfigurations
 
         services.Configure<KeycloakAuthenticationOptions>(configSection);
 
+        ConfigureAuthorization(services, configuration, options);
+        ConfigureClient(services, configuration);
+    }
+
+    private static void ConfigureAuthorization(
+        IServiceCollection services,
+        IConfiguration configuration,
+        KeycloakAuthenticationOptions options)
+    {
+        services.AddSingleton<IAuthorizationHandler, RequiredRoleOrRequestedUserHandler>();
+
         services
             .AddAuthorization()
-            .AddKeycloakAuthorization(configuration, ConfigConstants.KeycloakAdmin)
+            .AddKeycloakAuthorization(configuration, ConfigConstants.Keycloak)
             .AddAuthorizationBuilder()
-            .AddPolicy("admin-only", p => p.RequireResourceRolesForClient(options.Resource, ["admin"]));
+            .AddPolicy(KeycloakConstants.Policies.AdminOnly, p =>
+            {
+                string[] roles = [KeycloakConstants.Roles.Admin];
+                p.RequireResourceRolesForClient(options.Resource, roles);
+            })
+            .AddPolicy(KeycloakConstants.Policies.AdminOrRequestedUser, p =>
+            {
+                RequiredRoleOrRequestedUserRequirement requirement = new(KeycloakConstants.Roles.Admin);
+                p.Requirements.Add(requirement);
+            });
 
         services.AddAuthorizationServer(configuration);
+    }
 
+    private static void ConfigureClient(IServiceCollection services, IConfiguration configuration)
+    {
         services.AddDistributedMemoryCache();
-        
+
         services
             .AddClientCredentialsTokenManagement()
             .AddClient(ConfigConstants.Keycloak, client =>
