@@ -16,7 +16,9 @@ builder.Services.ConfigureMassTransit(builder.Configuration);
 
 builder.Services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-builder.Services.AddExceptionHandler<ExceptionHandler>();
+builder.Services
+    .AddProblemDetails()
+    .AddExceptionHandler<ExceptionHandler>();
 
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
