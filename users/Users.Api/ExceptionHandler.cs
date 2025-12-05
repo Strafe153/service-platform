@@ -15,10 +15,7 @@ public class ExceptionHandler : IExceptionHandler
 		var statusCode = GetHttpStatusCode(exception);
 
 		await Results
-			.Problem(
-				exception.Message,
-				httpContext.Request.Path,
-				(int)statusCode)
+			.Problem(exception.Message, httpContext.Request.Path, (int)statusCode)
 			.ExecuteAsync(httpContext);
 
 		return true;
