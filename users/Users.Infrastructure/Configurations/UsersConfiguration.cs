@@ -42,6 +42,10 @@ public class UsersConfiguration : IEntityTypeConfiguration<User>
             b => b.Address,
             o => o.ToTable("Addresses"));
 
+        builder.HasIndex(b => b.AuthProviderId)
+            .HasDatabaseName("IX_Users_AuthProviderId")
+            .IsClustered(false);
+
         builder.ToTable("Users");
     }
 }
