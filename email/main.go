@@ -8,26 +8,21 @@ import (
 
 	"email/mailing"
 	"email/messaging"
-
-	"github.com/joho/godotenv"
 )
 
-const messageQueue = "MESSAGE_QUEUE"
-
 func main() {
-	if err := godotenv.Load(); err != nil {
-		failOnError(err, "Failed to load .env file")
-	}
+	config := getConfig()
+	mailer := mailing.NewMailer(&config.Mailpit)
 
-	queue := os.Getenv(messageQueue)
-	provider := messaging.NewProvider(queue)
+	provider := messaging.NewRabbitMQProvider(&config.RabbitMq)
 
-	if err := provider.Connect(); err != nil {
-		failOnError(err, "Failed to connect")
-	}
+	provider.AttachHandler("user-created", mailer.SendAccountRegistration)
+	provider.AttachHandler("user-deleted", mailer.SendAccountRemoval)
 
-	if err := provider.Consume(mailing.SendAccountRegistration); err != nil {
-		failOnError(err, "Failed to consume")
+	provider.Connect()
+
+	if err := provider.Consume(); err != nil {
+		failOnError(err, "failed to consume")
 	}
 
 	waitForShutdown()

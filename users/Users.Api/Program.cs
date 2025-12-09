@@ -1,6 +1,7 @@
 using Users.Api;
 using Users.Api.Configurations;
 using Users.Api.Configurations.Authorization;
+using Users.Api.Configurations.Messaging;
 using Users.Api.Endpoints;
 using Users.Domain.Aggregates.User;
 using Users.Infrastructure.Repositories;

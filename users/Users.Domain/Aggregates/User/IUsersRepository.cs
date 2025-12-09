@@ -4,13 +4,15 @@ public interface IUsersRepository
 {
     IQueryable<User> Get();
 
-    Task<User?> GetByIdAsync(Ulid id);
+    Task<User?> GetByIdAsync(Ulid id, CancellationToken cancellationToken);
 
-    Task<User?> GetByAuthProviderIdAsync(string id);
+    Task<User?> GetByAuthProviderIdAsync(string id, CancellationToken cancellationToken);
 
     void Add(User user);
 
     void Update(User user);
+
+    void Delete(User user);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

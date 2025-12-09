@@ -1,4 +1,4 @@
-namespace Users.Api.Configurations.Models;
+namespace Users.Api.Configurations.Messaging;
 
 public sealed class RabbitMqOptions
 {

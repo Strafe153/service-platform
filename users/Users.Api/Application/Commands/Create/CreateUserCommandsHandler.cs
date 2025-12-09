@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Users.Api.Application.Queries.Dto;
+using Users.Api.Configurations.Messaging;
 using Users.Api.Keycloak;
 using Users.Api.Mapping;
 using Users.Domain.Aggregates.User;
@@ -23,13 +24,13 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
 
     public CreateUserCommandHandler(
         IUsersRepository usersRepository,
-        IKeycloakClient keycloakClient,
         IPublishEndpoint publishEndpoint,
+        IKeycloakClient keycloakClient,
         IOptions<KeycloakAuthenticationOptions> keycloakOptions)
     {
         _usersRepository = usersRepository;
-        _keycloakClient = keycloakClient;
         _publishEndpoint = publishEndpoint;
+        _keycloakClient = keycloakClient;
         _keycloakOptions = keycloakOptions.Value;
     }
 
@@ -114,7 +115,11 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
 
         return _publishEndpoint.Publish(
             userCreatedEvent,
-            c => c.CorrelationId = Guid.NewGuid(),
+            c =>
+            {
+                c.CorrelationId = Guid.NewGuid();
+                c.SetRoutingKey(RabbitMqConstants.RoutingKeys.UserCreated);
+            },
             cancellationToken);
     }
 }

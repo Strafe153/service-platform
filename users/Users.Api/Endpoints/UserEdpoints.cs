@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Users.Api.Application.Commands;
 using Users.Api.Application.Commands.Create;
+using Users.Api.Application.Commands.Delete;
 using Users.Api.Application.Commands.Update;
 using Users.Api.Application.Commands.UpdateAddress;
 using Users.Api.Application.Queries.Dto;
@@ -33,6 +34,9 @@ public static class UserEndpoints
             .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
 
         group.MapPut($"{idSpecifier}/address", UpdateAddress)
+            .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
+
+        group.MapDelete(idSpecifier, Delete)
             .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
     }
 
@@ -84,6 +88,15 @@ public static class UserEndpoints
         IdentifiedCommand<Ulid, UpdateAddressCommand> identifiedCommand = new(id, command);
         await sender.Send(identifiedCommand, cancellationToken);
 
+        return TypedResults.NoContent();
+    }
+
+    public static async Task<NoContent> Delete(
+        [FromServices] ISender sender,
+        [AsParameters] DeleteUserCommand command,
+        CancellationToken cancellationToken)
+    {
+        await sender.Send(command, cancellationToken);
         return TypedResults.NoContent();
     }
 }

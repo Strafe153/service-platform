@@ -60,7 +60,7 @@ public class RequiredRoleOrRequestedUserHandler
         using var scope = ctx.RequestServices.CreateScope();
         var usersRepository = scope.ServiceProvider.GetRequiredService<IUsersRepository>();
 
-        var user = await usersRepository.GetByAuthProviderIdAsync(nameClaim.Value);
+        var user = await usersRepository.GetByAuthProviderIdAsync(nameClaim.Value, CancellationToken.None);
 
         return parsedId == user?.Id;
     }

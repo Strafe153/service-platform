@@ -1,0 +1,31 @@
+{
+    "rabbit_mq": {
+        "user": "",
+        "password": "",
+        "host": "",
+        "port": 0,
+        "exchanges": [
+            {
+                "name": "user",
+                "kind": "direct",
+                "queues": [
+                    {
+                        "name": "user-created",
+                        "routingKey": "user.created"
+                    },
+                    {
+                        "name": "user-deleted",
+                        "routingKey": "user.deleted"
+                    }
+                ]
+            }
+        ]
+    },
+    "mailpit": {
+        "host": "",
+        "port": 0,
+        "sender": "",
+        "user": "",
+        "password": ""
+    }
+}

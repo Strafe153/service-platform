@@ -6,7 +6,8 @@ type ConsumeHandler = func([]byte) error
 
 type MessageProvider interface {
 	Connect() error
-	Consume(handler ConsumeHandler) error
+	AttachHandler(queue string, handler ConsumeHandler) error
+	Consume() error
 	Close() error
 }
 

@@ -1,7 +1,8 @@
 using MassTransit;
-using Users.Api.Configurations.Models;
+using RabbitMQ.Client;
+using Users.Domain.Events;
 
-namespace Users.Api.Configurations;
+namespace Users.Api.Configurations.Messaging;
 
 public static class MassTransitConfiguration
 {
@@ -20,6 +21,12 @@ public static class MassTransitConfiguration
                    c.Username(options.Username);
                    c.Password(options.Password); 
                 });
+
+                cfg.Message<UserCreatedEvent>(c => c.SetEntityName(RabbitMqConstants.Exchanges.User));
+                cfg.Publish<UserCreatedEvent>(c => c.ExchangeType = ExchangeType.Direct);
+
+                cfg.Message<UserDeletedEvent>(c => c.SetEntityName(RabbitMqConstants.Exchanges.User));
+                cfg.Publish<UserDeletedEvent>(c => c.ExchangeType = ExchangeType.Direct);
 
                 cfg.ConfigureEndpoints(context);
             });

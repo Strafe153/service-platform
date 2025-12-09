@@ -2,123 +2,123 @@ package messaging
 
 import (
 	"fmt"
-	"os"
-	"strconv"
+	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-const (
-	rabbitMQPort     = "RABBITMQ_PORT"
-	rabbitMQHost     = "RABBITMQ_HOST"
-	rabbitMQUser     = "RABBITMQ_USER"
-	rabbitMQPassword = "RABBITMQ_PASSWORD"
-)
-
-type rabbitMQConfig struct {
-	host     string
-	port     int
-	user     string
-	password string
+type RabbitMQQueue struct {
+	Name       string
+	RoutingKey string
 }
 
-func readConfig() (*rabbitMQConfig, error) {
-	port, err := strconv.Atoi(os.Getenv(rabbitMQPort))
+type RabbitMQExchange struct {
+	Name   string
+	Kind   string
+	Queues []RabbitMQQueue
+}
 
-	if err != nil {
-		return nil, err
-	}
+type RabbitMQConfig struct {
+	User      string
+	Password  string
+	Host      string
+	Port      int
+	Exchanges []RabbitMQExchange
+}
 
-	host := os.Getenv(rabbitMQHost)
-	user := os.Getenv(rabbitMQUser)
-	password := os.Getenv(rabbitMQPassword)
-
-	config := &rabbitMQConfig{
-		host,
-		port,
-		user,
-		password,
-	}
-
-	return config, nil
+func (c *RabbitMQConfig) getConnectionString() string {
+	return fmt.Sprintf("amqp://%s:%s@%s:%d", c.User, c.Password, c.Host, c.Port)
 }
 
 type RabbitMQProvider struct {
-	conn  *amqp.Connection
-	ch    *amqp.Channel
-	queue string
+	conn     *amqp.Connection
+	config   *RabbitMQConfig
+	handlers map[string]ConsumeHandler
+	channels []*amqp.Channel
 }
 
-func NewProvider(queue string) MessageProvider {
-	return &RabbitMQProvider{queue: queue}
+func (p *RabbitMQProvider) AttachHandler(queue string, handler ConsumeHandler) error {
+	p.handlers[queue] = handler
+	return nil
 }
 
 func declareQueue(ch *amqp.Channel, name string) (amqp.Queue, error) {
 	return ch.QueueDeclare(name, true, false, false, false, nil)
 }
 
-func bindQueue(ch *amqp.Channel, queueName string, exchange string) error {
-	return ch.QueueBind(queueName, "", exchange, false, nil)
-}
-
 func (p *RabbitMQProvider) Connect() error {
-	config, err := readConfig()
+	connStr := p.config.getConnectionString()
 
+	conn, err := amqp.Dial(connStr)
 	if err != nil {
 		return err
 	}
 
-	connString := fmt.Sprintf("amqp://%s:%s@%s:%d", config.user, config.password, config.host, config.port)
-	conn, err := amqp.Dial(connString)
+	for _, ex := range p.config.Exchanges {
+		ch, err := conn.Channel()
+		if err != nil {
+			return err
+		}
 
-	if err != nil {
-		return err
-	}
+		p.channels = append(p.channels, ch)
+		if err := ch.ExchangeDeclare(ex.Name, ex.Kind, true, false, false, false, nil); err != nil {
+			return err
+		}
 
-	ch, err := conn.Channel()
+		for _, q := range ex.Queues {
+			if _, err := declareQueue(ch, q.Name); err != nil {
+				return err
+			}
 
-	if err != nil {
-		return err
-	}
-
-	queue, err := declareQueue(ch, "email")
-
-	if err != nil {
-		return err
-	}
-
-	if err := bindQueue(ch, queue.Name, "Users.Domain.Events:UserCreatedEvent"); err != nil {
-		return err
+			if err := ch.QueueBind(q.Name, q.RoutingKey, ex.Name, false, nil); err != nil {
+				return err
+			}
+		}
 	}
 
 	p.conn = conn
-	p.ch = ch
 
 	return nil
 }
 
-func (p *RabbitMQProvider) Consume(handler ConsumeHandler) error {
-	delivery, err := p.ch.Consume(p.queue, "", true, false, false, false, nil)
+func (p *RabbitMQProvider) Consume() error {
+	for _, ex := range p.config.Exchanges {
+		for _, q := range ex.Queues {
+			handler, ok := p.handlers[q.Name]
+			if !ok {
+				return fmt.Errorf("no handler registered for queue %s", q.Name)
+			}
 
-	if err != nil {
-		return err
-	}
+			ch, err := p.conn.Channel()
+			if err != nil {
+				return err
+			}
 
-	go func() {
-		for m := range delivery {
-			handler(m.Body)
+			delivery, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+			if err != nil {
+				return err
+			}
+
+			go func(queue string, handler ConsumeHandler) {
+				for msg := range delivery {
+					if err := handler(msg.Body); err != nil {
+						log.Printf("queue %s handler error %v", queue, err)
+					}
+				}
+			}(q.Name, handler)
 		}
-	}()
+	}
 
 	return nil
 }
 
 func (p *RabbitMQProvider) Close() error {
-	if p.ch != nil {
-		err := p.ch.Close()
-
-		if err != nil {
-			return err
+	if len(p.handlers) > 0 {
+		for _, c := range p.channels {
+			// error is ignored due to the channel potentially already being closed
+			// and not to return from the function to close other channels even if
+			// one of them fails
+			c.Close()
 		}
 	}
 
@@ -127,4 +127,11 @@ func (p *RabbitMQProvider) Close() error {
 	}
 
 	return nil
+}
+
+func NewRabbitMQProvider(config *RabbitMQConfig) MessageProvider {
+	return &RabbitMQProvider{
+		config:   config,
+		handlers: make(map[string]ConsumeHandler),
+	}
 }

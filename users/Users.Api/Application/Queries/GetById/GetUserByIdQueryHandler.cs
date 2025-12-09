@@ -16,7 +16,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserRea
 
     public async Task<UserReadDto> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdAsync(request.Id)
+        var user = await _usersRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NullReferenceException($"User with id {request.Id} not found.");
 
         return user.ToReadDto();
