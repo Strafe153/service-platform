@@ -1,3 +1,4 @@
+using FluentValidation;
 using Users.Api;
 using Users.Api.Configurations;
 using Users.Api.Configurations.Authorization;
@@ -14,8 +15,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.ConfigureDatabase(builder.Configuration);
 builder.Services.ConfigureKeycloak(builder.Configuration);
 builder.Services.ConfigureMassTransit(builder.Configuration);
+builder.Services.ConfigureMediatR();
 
-builder.Services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 builder.Services
     .AddProblemDetails()

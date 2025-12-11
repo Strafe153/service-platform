@@ -40,7 +40,16 @@ public class UsersConfiguration : IEntityTypeConfiguration<User>
 
         builder.OwnsOne(
             b => b.Address,
-            o => o.ToTable("Addresses"));
+            o =>
+            {
+                o.Property(a => a.Country).HasMaxLength(60);
+                o.Property(a => a.State).HasMaxLength(100);
+                o.Property(a => a.City).HasMaxLength(100);
+                o.Property(a => a.ZipCode).HasMaxLength(10);
+                o.Property(a => a.Street).HasMaxLength(100);
+
+                o.ToTable("Addresses");
+            });
 
         builder.HasIndex(b => b.AuthProviderId)
             .HasDatabaseName("IX_Users_AuthProviderId")
