@@ -4,5 +4,5 @@ using Users.Api.Application.Queries.Dto;
 namespace Users.Api.Application.Queries.GetAll;
 
 public record GetUsersRequest(
-    int PageNumber,
-    int PageSize) : IRequest<PageDto<UserReadDto>>;
+    int PageNumber = 1,
+    int PageSize = 20) : IRequest<PageDto<UserReadDto>>;
