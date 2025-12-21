@@ -33,13 +33,13 @@ func (r *Order) ToResponse() OrderResponse {
 }
 
 type OrderProduct struct {
-	Id    string
-	Count int
+	Id    string `json:"id" validate:"required,alphanum,min=24,max=24"`
+	Count int    `json:"count" validate:"required,min=1,max=9999"`
 }
 
 type CreateOrderRequest struct {
-	UserId   string         `json:"userId"`
-	Products []OrderProduct `json:"products"`
+	UserId   string         `json:"userId" validate:"required,alphanum,min=26,max=26"`
+	Products []OrderProduct `json:"products" validate:"required,min=1,max=999,dive"`
 }
 
 func (r *CreateOrderRequest) ToOrder() Order {

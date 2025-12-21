@@ -22,9 +22,9 @@ func (p *Product) ToResponse() ProductResponse {
 }
 
 type CreateProductRequest struct {
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
-	Count int     `json:"count"`
+	Name  string  `json:"name" validate:"required,min=3,max=100"`
+	Price float64 `json:"price" validate:"required,gte=1.0,lte=999999.99"`
+	Count int     `json:"count" validate:"required,min=1,max=99999"`
 }
 
 func (r *CreateProductRequest) ToProduct() Product {
@@ -36,9 +36,9 @@ func (r *CreateProductRequest) ToProduct() Product {
 }
 
 type UpdateProductRequest struct {
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
-	Count int     `json:"count"`
+	Name  string  `json:"name" validate:"required,min=3,max=100"`
+	Price float64 `json:"price" validate:"required,gte=1.0,lte=999999.99"`
+	Count int     `json:"count" validate:"required,min=1,max=99999"`
 }
 
 func (r *UpdateProductRequest) ToProduct() Product {

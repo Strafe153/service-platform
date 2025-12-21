@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"orders/domain"
 
+	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -48,6 +49,12 @@ func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
 	var request domain.CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(request); err != nil {
+		writeProblem(w, r, http.StatusBadGateway, err)
 		return
 	}
 

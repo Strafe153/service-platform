@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"orders/domain"
 
+	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -59,6 +60,12 @@ func (h *Handler) createProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	validate := validator.New()
+	if err := validate.Struct(request); err != nil {
+		writeProblem(w, r, http.StatusBadRequest, err)
+		return
+	}
+
 	product := request.ToProduct()
 	product.IsAvailable = true
 
@@ -78,15 +85,21 @@ func (h *Handler) createProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) updateProduct(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	oId, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		writeProblem(w, r, http.StatusBadRequest, err)
+		return
+	}
+
 	var request domain.UpdateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	id := r.PathValue("id")
-	oId, err := bson.ObjectIDFromHex(id)
-	if err != nil {
+	validate := validator.New()
+	if err := validate.Struct(request); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 		return
 	}
