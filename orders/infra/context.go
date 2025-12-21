@@ -26,9 +26,9 @@ func GetContext(cfg *DatabaseConfig) (*DatabaseContext, error) {
 		return nil, err
 	}
 
-	repo := &DatabaseContext{cfg, client}
+	context := &DatabaseContext{cfg, client}
 
-	return repo, nil
+	return context, nil
 }
 
 func configureMongoContext(c context.Context) (context.Context, context.CancelFunc) {
