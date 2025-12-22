@@ -19,6 +19,8 @@ func main() {
 	provider.AttachHandler("user-created", mailer.SendAccountRegistration)
 	provider.AttachHandler("user-deleted", mailer.SendAccountRemoval)
 
+	provider.AttachHandler("order-created", mailer.SendOrderCreated)
+
 	provider.Connect()
 
 	if err := provider.Consume(); err != nil {

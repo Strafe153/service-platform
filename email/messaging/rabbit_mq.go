@@ -8,22 +8,22 @@ import (
 )
 
 type RabbitMQQueue struct {
-	Name       string
-	RoutingKey string
+	Name       string `json:"name"`
+	RoutingKey string `json:"routingKey"`
 }
 
 type RabbitMQExchange struct {
-	Name   string
-	Kind   string
-	Queues []RabbitMQQueue
+	Name   string          `json:"name"`
+	Kind   string          `json:"kind"`
+	Queues []RabbitMQQueue `json:"queues"`
 }
 
 type RabbitMQConfig struct {
-	User      string
-	Password  string
-	Host      string
-	Port      int
-	Exchanges []RabbitMQExchange
+	User      string             `json:"user"`
+	Password  string             `json:"password"`
+	Host      string             `json:"host"`
+	Port      int                `json:"port"`
+	Exchanges []RabbitMQExchange `json:"exchanges"`
 }
 
 func (c *RabbitMQConfig) getConnectionString() string {
@@ -37,23 +37,11 @@ type RabbitMQProvider struct {
 	channels []*amqp.Channel
 }
 
-func (p *RabbitMQProvider) AttachHandler(queue string, handler ConsumeHandler) error {
-	p.handlers[queue] = handler
-	return nil
-}
-
 func declareQueue(ch *amqp.Channel, name string) (amqp.Queue, error) {
 	return ch.QueueDeclare(name, true, false, false, false, nil)
 }
 
-func (p *RabbitMQProvider) Connect() error {
-	connStr := p.config.getConnectionString()
-
-	conn, err := amqp.Dial(connStr)
-	if err != nil {
-		return err
-	}
-
+func configureTopology(p *RabbitMQProvider, conn *amqp.Connection) error {
 	for _, ex := range p.config.Exchanges {
 		ch, err := conn.Channel()
 		if err != nil {
@@ -76,8 +64,28 @@ func (p *RabbitMQProvider) Connect() error {
 		}
 	}
 
+	return nil
+}
+
+func (p *RabbitMQProvider) Connect() error {
+	connStr := p.config.getConnectionString()
+
+	conn, err := amqp.Dial(connStr)
+	if err != nil {
+		return err
+	}
+
+	if err := configureTopology(p, conn); err != nil {
+		return err
+	}
+
 	p.conn = conn
 
+	return nil
+}
+
+func (p *RabbitMQProvider) AttachHandler(queue string, handler ConsumeHandler) error {
+	p.handlers[queue] = handler
 	return nil
 }
 

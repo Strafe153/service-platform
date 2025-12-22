@@ -1,6 +1,9 @@
 package domain
 
 import (
+	"context"
+	"time"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -51,4 +54,18 @@ type OrderResponse struct {
 	UserId   string            `json:"userId"`
 	Products []ProductResponse `json:"products"`
 	Status   orderStatus       `json:"status"`
+}
+
+type OrdersRepository interface {
+	GetAll(c context.Context) ([]*Order, error)
+	GetByUserId(id string, c context.Context) ([]*Order, error)
+	Get(id bson.ObjectID, c context.Context) (*Order, error)
+	Create(order *Order, c context.Context) (string, error)
+	Cancel(id bson.ObjectID, c context.Context) error
+}
+
+type OrderCreatedEvent struct {
+	Email       string    `json:"email"`
+	OrderNumber string    `json:"orderNumber"`
+	CreatedAt   time.Time `json:"createdAt"`
 }

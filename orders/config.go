@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/json"
 	"orders/infra"
+	"orders/messaging"
 	"os"
 )
 
 type Config struct {
-	Database infra.DatabaseConfig `json:"database"`
+	Database infra.DatabaseConfig     `json:"database"`
+	RabbitMQ messaging.RabbitMQConfig `json:"rabbit_mq"`
 }
 
 func getConfig() (*Config, error) {

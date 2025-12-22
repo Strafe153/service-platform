@@ -14,14 +14,12 @@ type Config struct {
 
 func getConfig() *Config {
 	cfgFile, err := os.ReadFile("config.json")
-	if err != nil {
-		failOnError(err, "failed to read config file")
-	}
+	failOnError(err, "failed to read the config file")
 
 	var cfg Config
-	if err := json.Unmarshal(cfgFile, &cfg); err != nil {
-		failOnError(err, "failed to parsed the config file")
-	}
+	err = json.Unmarshal(cfgFile, &cfg)
+
+	failOnError(err, "failed to parse the config file")
 
 	return &cfg
 }

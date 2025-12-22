@@ -35,22 +35,6 @@ type MailMessage[T any] struct {
 	template  string
 }
 
-func getEmailBody[T any](msg *MailMessage[T]) (*bytes.Buffer, error) {
-	tmpPath := fmt.Sprintf("./mailing/templates/%s.html", msg.template)
-
-	tmp, err := template.ParseFiles(tmpPath)
-	if err != nil {
-		return nil, err
-	}
-
-	var msgBody bytes.Buffer
-	if err := tmp.Execute(&msgBody, msg.body); err != nil {
-		return nil, err
-	}
-
-	return &msgBody, nil
-}
-
 func (m *MailMessage[T]) Send(mailer *Mailer) error {
 	body, err := getEmailBody(m)
 	if err != nil {
@@ -68,4 +52,20 @@ func (m *MailMessage[T]) Send(mailer *Mailer) error {
 	d := mailer.toDialer()
 
 	return d.DialAndSend(msg)
+}
+
+func getEmailBody[T any](msg *MailMessage[T]) (*bytes.Buffer, error) {
+	tmpPath := fmt.Sprintf("./mailing/templates/%s.html", msg.template)
+
+	tmp, err := template.ParseFiles(tmpPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var msgBody bytes.Buffer
+	if err := tmp.Execute(&msgBody, msg.body); err != nil {
+		return nil, err
+	}
+
+	return &msgBody, nil
 }
