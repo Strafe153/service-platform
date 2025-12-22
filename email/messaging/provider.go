@@ -1,6 +1,10 @@
 package messaging
 
-import "github.com/google/uuid"
+import (
+	"encoding/json"
+
+	"github.com/google/uuid"
+)
 
 type ConsumeHandler = func([]byte) error
 
@@ -15,4 +19,13 @@ type MessageWrapper[T any] struct {
 	MessageId     uuid.UUID
 	CorrelationId uuid.UUID
 	Message       T
+}
+
+func UnwrapMessage[T any](data []byte) (*T, error) {
+	var wrapper MessageWrapper[T]
+	if err := json.Unmarshal(data, &wrapper); err != nil {
+		return nil, err
+	}
+
+	return &wrapper.Message, nil
 }

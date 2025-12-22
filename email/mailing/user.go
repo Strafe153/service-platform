@@ -2,49 +2,49 @@ package mailing
 
 import (
 	"email/messaging"
-	"encoding/json"
+	"time"
 )
 
 type AccountRegistrationBody struct {
-	TimeStamp string
+	RegisteredAt time.Time
 }
 
 func (m *Mailer) SendAccountRegistration(data []byte) error {
-	var wrapper messaging.MessageWrapper[messaging.UserCreatedEvent]
-	if err := json.Unmarshal(data, &wrapper); err != nil {
+	msg, err := messaging.UnwrapMessage[messaging.UserCreatedEvent](data)
+	if err != nil {
 		return err
 	}
 
-	msgBody := AccountRegistrationBody{TimeStamp: wrapper.Message.CreatedAt}
+	msgBody := AccountRegistrationBody{msg.CreatedAt}
 
-	msg := MailMessage[AccountRegistrationBody]{
-		recipient: wrapper.Message.Email,
+	mailMsg := MailMessage[AccountRegistrationBody]{
+		recipient: msg.Email,
 		subject:   "Account registration",
 		body:      msgBody,
-		template:  "registration",
+		template:  "user/registration",
 	}
 
-	return msg.Send(m)
+	return mailMsg.Send(m)
 }
 
 type AccountRemovalBody struct {
-	TimeStamp string
+	DeletedAt time.Time
 }
 
 func (m *Mailer) SendAccountRemoval(data []byte) error {
-	var wrapper messaging.MessageWrapper[messaging.UserDeletedEvent]
-	if err := json.Unmarshal(data, &wrapper); err != nil {
+	msg, err := messaging.UnwrapMessage[messaging.UserDeletedEvent](data)
+	if err != nil {
 		return err
 	}
 
-	msgBody := AccountRemovalBody{TimeStamp: wrapper.Message.DeletedAt}
+	msgBody := AccountRemovalBody{msg.DeletedAt}
 
-	msg := MailMessage[AccountRemovalBody]{
-		recipient: wrapper.Message.Email,
+	mailMsg := MailMessage[AccountRemovalBody]{
+		recipient: msg.Email,
 		subject:   "Account removal",
 		body:      msgBody,
-		template:  "removal",
+		template:  "user/removal",
 	}
 
-	return msg.Send(m)
+	return mailMsg.Send(m)
 }

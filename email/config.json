@@ -18,6 +18,16 @@
                         "routingKey": "user.deleted"
                     }
                 ]
+            },
+            {
+                "name": "order",
+                "kind": "direct",
+                "queues": [
+                    {
+                        "name": "order-created",
+                        "routingKey": "order.created"
+                    }
+                ]
             }
         ]
     },

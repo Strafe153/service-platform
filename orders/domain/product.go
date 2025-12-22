@@ -1,6 +1,10 @@
 package domain
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 // Only admin should be able to add products
 type Product struct {
@@ -55,4 +59,13 @@ type ProductResponse struct {
 	Price       float64 `json:"price"`
 	Count       int     `json:"count"`
 	IsAvailable bool    `json:"isAvailable"`
+}
+
+type ProductsRepository interface {
+	GetAll(c context.Context) ([]*Product, error)
+	GetByIds(ids []bson.ObjectID, c context.Context) ([]Product, error)
+	Get(id bson.ObjectID, c context.Context) (*Product, error)
+	Create(product *Product, c context.Context) (string, error)
+	Update(id bson.ObjectID, product *Product, c context.Context) error
+	Discontinue(id bson.ObjectID, c context.Context) error
 }

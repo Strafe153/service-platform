@@ -41,7 +41,7 @@ func (r *OrdersRepository) GetAll(c context.Context) ([]*domain.Order, error) {
 	return orders, nil
 }
 
-func (r *ProductsRepository) GetByUserId(id string, c context.Context) ([]*domain.Order, error) {
+func (r *OrdersRepository) GetByUserId(id string, c context.Context) ([]*domain.Order, error) {
 	ctx, cancel := configureMongoContext(c)
 	defer cancel()
 

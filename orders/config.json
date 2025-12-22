@@ -4,5 +4,12 @@
         "database": "local",
         "ordersCollection": "orders",
         "productsCollection": "products"
+    },
+    "rabbit_mq": {
+        "user": "",
+        "password": "",
+        "host": "",
+        "port": 0,
+        "exchange": "order"
     }
 }
