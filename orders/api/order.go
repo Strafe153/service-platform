@@ -10,9 +10,9 @@ import (
 func RegisterOrderEndpoints(mux *http.ServeMux, h *Handler) {
 	mux.HandleFunc("GET /orders", h.getOrders)
 	mux.HandleFunc("GET /orders/{id}", h.getOrder)
+	mux.HandleFunc("GET /orders/user/{id}", h.getOrdersByUserId)
 	mux.HandleFunc("POST /orders", h.createOrder)
 	mux.HandleFunc("POST /orders/{id}/cancel", h.cancelOrder)
-	mux.HandleFunc("GET /orders/user/{id}", h.getOrdersByUserId)
 }
 
 func (h *Handler) getOrders(w http.ResponseWriter, r *http.Request) {
