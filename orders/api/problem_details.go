@@ -33,9 +33,13 @@ func writeProblem(w http.ResponseWriter, r *http.Request, status int, err error)
 
 func getTitle(status int) string {
 	switch status {
-	case 400:
+	case http.StatusBadRequest:
 		return "Bad Request"
-	case 404:
+	case http.StatusUnauthorized:
+		return "Unauthorized"
+	case http.StatusForbidden:
+		return "Forbidden"
+	case http.StatusNotFound:
 		return "Not Found"
 	}
 
@@ -44,9 +48,13 @@ func getTitle(status int) string {
 
 func getType(status int) string {
 	switch status {
-	case 400:
+	case http.StatusBadRequest:
 		return "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1"
-	case 404:
+	case http.StatusUnauthorized:
+		return "https://www.rfc-editor.org/rfc/rfc7235#section-3.1"
+	case http.StatusForbidden:
+		return "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.3"
+	case http.StatusNotFound:
 		return "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.4"
 	}
 

@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Users.Domain.Aggregates.User;
 
 namespace Users.Api.Configurations.Authorization;
 
@@ -14,13 +13,6 @@ public class RequiredRoleOrRequestedUserHandler
         if (context.User.IsInRole(requirement.Role))
         {
             context.Succeed(requirement);
-            return;
-        }
-
-        var hasSubClaim = context.User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier);
-
-        if (!hasSubClaim)
-        {
             return;
         }
 
@@ -42,14 +34,6 @@ public class RequiredRoleOrRequestedUserHandler
             return false;
         }
 
-        // Identity cannot be null at this point due to the previous checks
-        var nameClaim = ((ClaimsIdentity)context.User.Identity!).FindFirst(ClaimTypes.NameIdentifier);
-        
-        if (nameClaim is null)
-        {
-            return false;
-        }
-
         var requestedId = ctx.Request.RouteValues.GetValueOrDefault(KeycloakConstants.Id);
 
         if (requestedId is not string id || !Ulid.TryParse(id, out var parsedId))
@@ -57,11 +41,14 @@ public class RequiredRoleOrRequestedUserHandler
             return false;
         }
 
-        using var scope = ctx.RequestServices.CreateScope();
-        var usersRepository = scope.ServiceProvider.GetRequiredService<IUsersRepository>();
+        var identity = (ClaimsIdentity?)context.User.Identity;
+        var currentUserIdClaim = identity?.FindFirst(KeycloakConstants.Claims.UserId);
 
-        var user = await usersRepository.GetByAuthProviderIdAsync(nameClaim.Value, CancellationToken.None);
+        if (currentUserIdClaim is null || !Ulid.TryParse(currentUserIdClaim.Value, out var currentUserId))
+        {
+            return false;
+        }
 
-        return parsedId == user?.Id;
+        return parsedId == currentUserId;
     }
 }

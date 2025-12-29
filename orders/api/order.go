@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"orders/domain"
+	inf "orders/infrastructure"
 )
 
-func RegisterOrderEndpoints(mux *http.ServeMux, h *Handler) {
-	mux.HandleFunc("GET /orders", h.getOrders)
-	mux.HandleFunc("GET /orders/{id}", h.getOrder)
-	mux.HandleFunc("GET /orders/user/{id}", h.getOrdersByUserId)
-	mux.HandleFunc("POST /orders", h.createOrder)
-	mux.HandleFunc("POST /orders/{id}/cancel", h.cancelOrder)
+func RegisterOrderEndpoints(mux *http.ServeMux, h *Handler, cfg *inf.KeycloakConfig) {
+	adminOrSameUserPolicy := &AdminOrSameUserPolicy{}
+
+	mux.Handle("GET /orders", AuthMiddleware(&AdminOnlyPolicy{}, cfg, h.getOrders))
+	mux.Handle("GET /orders/{id}", AuthMiddleware(adminOrSameUserPolicy, cfg, h.getOrder))
+	mux.Handle("GET /orders/user/{id}", AuthMiddleware(adminOrSameUserPolicy, cfg, h.getOrdersByUserId))
+	mux.Handle("POST /orders", AuthMiddleware(adminOrSameUserPolicy, cfg, h.createOrder))
+	mux.Handle("POST /orders/{id}/cancel", AuthMiddleware(adminOrSameUserPolicy, cfg, h.cancelOrder))
 }
 
 func (h *Handler) getOrders(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +33,9 @@ func (h *Handler) getOrder(w http.ResponseWriter, r *http.Request) {
 
 	order, err := h.ordersService.GetById(id, r.Context())
 	if err != nil {
-		writeProblem(w, r, http.StatusNotFound, err)
+		code := translateAppError(err)
+		writeProblem(w, r, code, err)
+
 		return
 	}
 
@@ -57,7 +62,9 @@ func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
 
 	response, err := h.ordersService.Create(&request, r.Context())
 	if err != nil {
-		writeProblem(w, r, http.StatusBadRequest, err)
+		code := translateAppError(err)
+		writeProblem(w, r, code, err)
+
 		return
 	}
 

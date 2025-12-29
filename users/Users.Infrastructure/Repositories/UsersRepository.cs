@@ -17,9 +17,6 @@ public class UsersRepository : IUsersRepository
     public Task<User?> GetByIdAsync(Ulid id, CancellationToken cancellationToken) =>
         _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
-    public Task<User?> GetByAuthProviderIdAsync(string id, CancellationToken cancellationToken) =>
-        _context.Users.FirstOrDefaultAsync(u => u.AuthProviderId == id, cancellationToken);
-
     public void Add(User user) => _context.Users.Add(user);
 
     public void Update(User user) => _context.Entry(user).State = EntityState.Modified;

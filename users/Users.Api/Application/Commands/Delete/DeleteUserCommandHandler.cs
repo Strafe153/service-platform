@@ -42,11 +42,15 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand>
             user.AuthProviderId,
             cancellationToken);
 
-        await userResponse.ThrowIfNotSuccessKeycloakStatusCode(cancellationToken);
+        await userResponse.ThrowIfNotSuccessKeycloakStatusCodeAsync(cancellationToken);
+        await PublishUserDeletedEventAsync(user, cancellationToken);
+    }
 
+    private Task PublishUserDeletedEventAsync(User user, CancellationToken cancellationToken)
+    {
         UserDeletedEvent userDeletedEvent = new(user.Email, DateTime.UtcNow);
 
-        await _publishEndpoint.Publish(
+        var eventTask =_publishEndpoint.Publish(
             userDeletedEvent,
             c =>
             {
@@ -54,5 +58,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand>
                 c.SetRoutingKey(RabbitMqConstants.RoutingKeys.UserDeleted);
             },
             cancellationToken);
+
+        return eventTask;
     }
 }

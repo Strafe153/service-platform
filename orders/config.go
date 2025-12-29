@@ -2,14 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"orders/infra"
-	"orders/messaging"
+	inf "orders/infrastructure"
 	"os"
 )
 
 type Config struct {
-	Database infra.DatabaseConfig     `json:"database"`
-	RabbitMQ messaging.RabbitMQConfig `json:"rabbit_mq"`
+	Database inf.DatabaseConfig `json:"database"`
+	RabbitMQ inf.RabbitMQConfig `json:"rabbit_mq"`
+	Keycloak inf.KeycloakConfig `json:"keycloak"`
 }
 
 func getConfig() (*Config, error) {

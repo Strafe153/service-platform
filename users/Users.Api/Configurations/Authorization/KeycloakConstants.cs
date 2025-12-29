@@ -14,4 +14,9 @@ public static class KeycloakConstants
         public const string AdminOnly = "admin-only";
         public const string AdminOrRequestedUser = "admin-or-requested-user";
     }
+
+    public static class Claims
+    {
+        public const string UserId = "user_id";
+    }
 }

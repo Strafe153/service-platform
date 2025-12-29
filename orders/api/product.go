@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"orders/domain"
+	inf "orders/infrastructure"
 )
 
-func RegisterProductEndpoints(mux *http.ServeMux, h *Handler) {
-	mux.HandleFunc("GET /products", h.getProducts)
-	mux.HandleFunc("GET /products/{id}", h.getProduct)
-	mux.HandleFunc("POST /products", h.createProduct)
-	mux.HandleFunc("PUT /products/{id}", h.updateProduct)
-	mux.HandleFunc("POST /products/{id}/discontinue", h.discontinueProduct)
+func RegisterProductEndpoints(mux *http.ServeMux, h *Handler, cfg *inf.KeycloakConfig) {
+	adminOnlyPolicy := &AdminOnlyPolicy{}
+
+	mux.Handle("GET /products", AuthMiddleware(adminOnlyPolicy, cfg, h.getProducts))
+	mux.Handle("GET /products/{id}", AuthMiddleware(adminOnlyPolicy, cfg, h.getProduct))
+	mux.Handle("POST /products", AuthMiddleware(adminOnlyPolicy, cfg, h.createProduct))
+	mux.Handle("PUT /products/{id}", AuthMiddleware(adminOnlyPolicy, cfg, h.updateProduct))
+	mux.Handle("POST /products/{id}/discontinue", AuthMiddleware(adminOnlyPolicy, cfg, h.discontinueProduct))
 }
 
 func (h *Handler) getProducts(w http.ResponseWriter, r *http.Request) {

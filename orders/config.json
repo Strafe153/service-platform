@@ -11,5 +11,9 @@
         "host": "",
         "port": 0,
         "exchange": "order"
+    },
+    "keycloak": {
+        "url": "",
+        "realm": "users"
     }
 }
