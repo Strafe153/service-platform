@@ -1,27 +1,27 @@
 package api
 
 import (
-	"orders/application"
-	"orders/infra"
-	"orders/messaging"
+	app "orders/application"
+	"orders/domain"
+	inf "orders/infrastructure"
 )
 
 type Handler struct {
-	productsService *application.ProductsService
-	ordersService   *application.OrdersService
+	productsService *app.ProductsService
+	ordersService   *app.OrdersService
 }
 
-func GetHandler(dbConfig *infra.DatabaseConfig, msgProvider messaging.MessageProvider) (*Handler, error) {
-	ctx, err := infra.GetContext(dbConfig)
+func GetHandler(dbConfig *inf.DatabaseConfig, msgProvider domain.MessageProvider) (*Handler, error) {
+	ctx, err := inf.GetContext(dbConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	productsRepo := infra.NewProductsRepository(ctx)
-	productsService := application.NewProductsService(productsRepo)
+	productsRepo := inf.NewProductsRepository(ctx)
+	productsService := app.NewProductsService(productsRepo)
 
-	ordersRepo := infra.NewOrdersRepository(ctx)
-	ordersService := application.NewOrdersService(ordersRepo, productsRepo, msgProvider)
+	ordersRepo := inf.NewOrdersRepository(ctx)
+	ordersService := app.NewOrdersService(ordersRepo, productsRepo, msgProvider)
 
 	handler := &Handler{productsService, ordersService}
 

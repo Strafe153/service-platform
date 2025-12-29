@@ -1,7 +1,8 @@
-package messaging
+package infrastructure
 
 import (
 	"fmt"
+	"orders/domain"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -23,7 +24,7 @@ type RabbitMQProvider struct {
 	config *RabbitMQConfig
 }
 
-func NewRabbitMQProvider(config *RabbitMQConfig) MessageProvider {
+func NewRabbitMQProvider(config *RabbitMQConfig) domain.MessageProvider {
 	return &RabbitMQProvider{config: config}
 }
 

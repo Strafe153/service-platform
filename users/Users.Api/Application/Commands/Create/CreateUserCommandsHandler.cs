@@ -40,34 +40,48 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
         
         try
         {
-            var keycloakUser = request.ToKeycloakUser();
-            keycloakUser.Enabled = true;
+            var keycloakUser = await CreateUserAsync(request, cancellationToken);
+            userId = keycloakUser.Id!;
 
-            var userResponse = await _keycloakClient.CreateUserWithResponseAsync(
-                _keycloakOptions.Realm,
-                keycloakUser,
-                cancellationToken);
-
-            await userResponse.ThrowIfNotSuccessKeycloakStatusCode(cancellationToken);
-
-            if (!userResponse.Headers.TryGetValues(HeaderNames.Location, out var locationHeaders))
-            {
-                throw new ArgumentException("No 'Location' header was returned from Keycloak.");
-            }
-
-            userId = locationHeaders.First().Split('/')[^1];
             await SetUserPasswordAsync(request, userId, cancellationToken);
+            var dbUser = await SaveUserAsync(request, userId, cancellationToken);
 
-            var user = await SaveUserAsync(request, userId, cancellationToken);
-            await PublishUserCreatedEvent(request, cancellationToken);
+            var updateTask = SetUserIdAttributeAsync(keycloakUser, dbUser.Id, cancellationToken);
+            var eventTask = PublishUserCreatedEventAsync(request, cancellationToken);
 
-            return user.ToReadDto();
+            await Task.WhenAll(updateTask, eventTask);
+
+            return dbUser.ToReadDto();
         }
         catch (DbUpdateException)
         {
             await _keycloakClient.DeleteUserAsync(_keycloakOptions.Realm, userId, cancellationToken);
             throw;
         }
+    }
+
+    private async Task<UserRepresentation> CreateUserAsync(
+        CreateUserCommand request,
+        CancellationToken cancellationToken)
+    {
+        var keycloakUser = request.ToKeycloakUser();
+        keycloakUser.Enabled = true;
+
+        var userResponse = await _keycloakClient.CreateUserWithResponseAsync(
+            _keycloakOptions.Realm,
+            keycloakUser,
+            cancellationToken);
+
+        await userResponse.ThrowIfNotSuccessKeycloakStatusCodeAsync(cancellationToken);
+
+        if (!userResponse.Headers.TryGetValues(HeaderNames.Location, out var locationHeaders))
+        {
+            throw new ArgumentException("No 'Location' header was returned from Keycloak.");
+        }
+
+        keycloakUser.Id = locationHeaders.First().Split('/')[^1];
+
+        return keycloakUser;
     }
 
     private async Task SetUserPasswordAsync(
@@ -86,7 +100,7 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
             credentials,
             cancellationToken);
 
-        await response.ThrowIfNotSuccessKeycloakStatusCode(cancellationToken);
+        await response.ThrowIfNotSuccessKeycloakStatusCodeAsync(cancellationToken);
     }
 
     private async Task<User> SaveUserAsync(
@@ -109,11 +123,30 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
         return user;
     }
 
-    private Task PublishUserCreatedEvent(CreateUserCommand command, CancellationToken cancellationToken)
+    private Task<HttpResponseMessage> SetUserIdAttributeAsync(
+        UserRepresentation keycloakUser,
+        Ulid dbUserId,
+        CancellationToken cancellationToken)
+    {
+        keycloakUser.Attributes = new Dictionary<string, ICollection<string>>()
+        {
+            { "user_id", [dbUserId.ToString()] }
+        };
+
+        var updateTask = _keycloakClient.UpdateUserWithResponseAsync(
+            _keycloakOptions.Realm,
+            keycloakUser.Id!,
+            keycloakUser,
+            cancellationToken);
+
+        return updateTask;
+    }
+
+    private Task PublishUserCreatedEventAsync(CreateUserCommand command, CancellationToken cancellationToken)
     {
         UserCreatedEvent userCreatedEvent = new(command.Email, DateTime.UtcNow);
 
-        return _publishEndpoint.Publish(
+        var eventTask = _publishEndpoint.Publish(
             userCreatedEvent,
             c =>
             {
@@ -121,5 +154,7 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
                 c.SetRoutingKey(RabbitMqConstants.RoutingKeys.UserCreated);
             },
             cancellationToken);
+
+        return eventTask;
     }
 }

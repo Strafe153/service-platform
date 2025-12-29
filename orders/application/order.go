@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"orders/domain"
-	"orders/messaging"
+	inf "orders/infrastructure"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -14,13 +14,13 @@ import (
 type OrdersService struct {
 	ordersRepo   domain.OrdersRepository
 	productsRepo domain.ProductsRepository
-	msgProvider  messaging.MessageProvider
+	msgProvider  domain.MessageProvider
 }
 
 func NewOrdersService(
 	o domain.OrdersRepository,
 	p domain.ProductsRepository,
-	m messaging.MessageProvider,
+	m domain.MessageProvider,
 ) *OrdersService {
 	return &OrdersService{o, p, m}
 }
@@ -40,15 +40,22 @@ func (s *OrdersService) Get(c context.Context) ([]*domain.OrderResponse, error) 
 	return responses, nil
 }
 
-func (s *OrdersService) GetById(id string, c context.Context) (*domain.OrderResponse, error) {
+func (s *OrdersService) GetById(id string, c context.Context) (*domain.OrderResponse, *domain.AppError) {
 	oId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, domain.NewAppError(domain.ErrBadRequest, err.Error())
 	}
 
 	order, err := s.ordersRepo.Get(oId, c)
 	if err != nil {
-		return nil, err
+		return nil, domain.NewAppError(domain.ErrNotFound, err.Error())
+	}
+
+	isAdmin := c.Value(inf.IsAdmin).(bool)
+	userId := c.Value(inf.UserIdClaim)
+
+	if !isAdmin && order.UserId != userId {
+		return nil, domain.NewAppError(domain.ErrForbidden, "Access forbidden")
 	}
 
 	response := order.ToResponse()
@@ -72,62 +79,41 @@ func (s *OrdersService) GetByUserId(id string, c context.Context) ([]*domain.Ord
 }
 
 func (s *OrdersService) Create(
-	request *domain.CreateOrderRequest,
+	r *domain.CreateOrderRequest,
 	c context.Context,
-) (*domain.OrderResponse, error) {
+) (*domain.OrderResponse, *domain.AppError) {
+	isAdmin := c.Value(inf.IsAdmin).(bool)
+	userId := c.Value(inf.UserIdClaim)
+
+	if !isAdmin && r.UserId != userId {
+		return nil, domain.NewAppError(domain.ErrForbidden, "Cannot create an order for the user")
+	}
+
 	validate := validator.New()
-	if err := validate.Struct(request); err != nil {
-		return nil, err
+	if err := validate.Struct(r); err != nil {
+		return nil, domain.NewAppError(domain.ErrBadRequest, err.Error())
 	}
 
-	products, err := s.getProducts(request, c)
+	products, err := s.getProducts(r, c)
 	if err != nil {
-		return nil, err
+		return nil, domain.NewAppError(domain.ErrBadRequest, err.Error())
 	}
 
-	order := request.ToOrder()
+	order := r.ToOrder()
 	order.Products = products
 	order.Status = domain.ActiveOrder
 
 	id, err := s.ordersRepo.Create(&order, c)
 	if err != nil {
-		return nil, err
+		return nil, domain.NewAppError(domain.ErrBadRequest, err.Error())
 	}
 
 	response := order.ToResponse()
 	response.Id = id
 
-	if err := publishOrderCreated(s, &response); err != nil {
-		return nil, err
-	}
+	publishOrderCreated(s, c, &response)
 
 	return &response, nil
-}
-
-func publishOrderCreated(s *OrdersService, response *domain.OrderResponse) error {
-	err := s.msgProvider.Connect()
-	if err != nil {
-		return err
-	}
-	defer s.msgProvider.Close()
-
-	event := domain.OrderCreatedEvent{
-		Email:       "test@test.com",
-		OrderNumber: response.Id,
-		CreatedAt:   time.Now().UTC(),
-	}
-
-	wrapper, err := messaging.WrapMessage(event)
-	if err != nil {
-		return err
-	}
-
-	msgData, err := json.Marshal(wrapper)
-	if err != nil {
-		return err
-	}
-
-	return s.msgProvider.Publish("order.created", msgData)
 }
 
 func (s *OrdersService) Cancel(id string, c context.Context) error {
@@ -140,11 +126,11 @@ func (s *OrdersService) Cancel(id string, c context.Context) error {
 }
 
 func (s *OrdersService) getProducts(
-	request *domain.CreateOrderRequest,
+	r *domain.CreateOrderRequest,
 	c context.Context,
 ) ([]domain.Product, error) {
-	productIds := make([]bson.ObjectID, len(request.Products))
-	for i, product := range request.Products {
+	productIds := make([]bson.ObjectID, len(r.Products))
+	for i, product := range r.Products {
 		oId, err := bson.ObjectIDFromHex(product.Id)
 		if err != nil {
 			return nil, err
@@ -154,4 +140,32 @@ func (s *OrdersService) getProducts(
 	}
 
 	return s.productsRepo.GetByIds(productIds, c)
+}
+
+func publishOrderCreated(s *OrdersService, c context.Context, r *domain.OrderResponse) error {
+	err := s.msgProvider.Connect()
+	if err != nil {
+		return err
+	}
+	defer s.msgProvider.Close()
+
+	email := c.Value(inf.EmailClaim).(string)
+
+	event := domain.OrderCreatedEvent{
+		Email:       email,
+		OrderNumber: r.Id,
+		CreatedAt:   time.Now().UTC(),
+	}
+
+	wrapper, err := domain.WrapMessage(event)
+	if err != nil {
+		return err
+	}
+
+	msgData, err := json.Marshal(wrapper)
+	if err != nil {
+		return err
+	}
+
+	return s.msgProvider.Publish("order.created", msgData)
 }

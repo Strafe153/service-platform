@@ -6,8 +6,6 @@ public interface IUsersRepository
 
     Task<User?> GetByIdAsync(Ulid id, CancellationToken cancellationToken);
 
-    Task<User?> GetByAuthProviderIdAsync(string id, CancellationToken cancellationToken);
-
     void Add(User user);
 
     void Update(User user);

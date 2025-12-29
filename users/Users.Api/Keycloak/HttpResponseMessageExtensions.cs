@@ -4,7 +4,7 @@ namespace Users.Api.Keycloak;
 
 public static class HttpResponsemessageExtensions
 {
-    public static async Task ThrowIfNotSuccessKeycloakStatusCode(
+    public static async Task ThrowIfNotSuccessKeycloakStatusCodeAsync(
         this HttpResponseMessage response,
         CancellationToken cancellationToken)
     {
