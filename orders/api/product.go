@@ -19,7 +19,9 @@ func RegisterProductEndpoints(mux *http.ServeMux, h *Handler, cfg *inf.KeycloakC
 }
 
 func (h *Handler) getProducts(w http.ResponseWriter, r *http.Request) {
-	products, err := h.productsService.Get(r.Context())
+	page := readPageParams(r.URL.Query())
+
+	products, err := h.productsService.Get(page, r.Context())
 	if err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 		return
@@ -29,7 +31,7 @@ func (h *Handler) getProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getProduct(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id := readRouteId(r)
 
 	product, err := h.productsService.GetById(id, r.Context())
 	if err != nil {
@@ -60,7 +62,7 @@ func (h *Handler) createProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) updateProduct(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id := readRouteId(r)
 
 	var request domain.UpdateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -77,7 +79,7 @@ func (h *Handler) updateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) discontinueProduct(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id := readRouteId(r)
 
 	if err := h.productsService.Discontinue(id, r.Context()); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)

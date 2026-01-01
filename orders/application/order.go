@@ -25,16 +25,15 @@ func NewOrdersService(
 	return &OrdersService{o, p, m}
 }
 
-func (s *OrdersService) Get(c context.Context) ([]*domain.OrderResponse, error) {
-	orders, err := s.ordersRepo.GetAll(c)
+func (s *OrdersService) Get(page domain.Page, c context.Context) ([]domain.OrderResponse, error) {
+	orders, err := s.ordersRepo.GetAll(page, c)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]*domain.OrderResponse, len(orders))
+	responses := make([]domain.OrderResponse, len(orders))
 	for i, o := range orders {
-		response := o.ToResponse()
-		responses[i] = &response
+		responses[i] = o.ToResponse()
 	}
 
 	return responses, nil
@@ -63,16 +62,19 @@ func (s *OrdersService) GetById(id string, c context.Context) (*domain.OrderResp
 	return &response, nil
 }
 
-func (s *OrdersService) GetByUserId(id string, c context.Context) ([]*domain.OrderResponse, error) {
-	orders, err := s.ordersRepo.GetByUserId(id, c)
+func (s *OrdersService) GetByUserId(
+	id string,
+	page domain.Page,
+	c context.Context,
+) ([]domain.OrderResponse, error) {
+	orders, err := s.ordersRepo.GetByUserId(id, page, c)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]*domain.OrderResponse, len(orders))
+	responses := make([]domain.OrderResponse, len(orders))
 	for i, o := range orders {
-		response := o.ToResponse()
-		responses[i] = &response
+		responses[i] = o.ToResponse()
 	}
 
 	return responses, nil

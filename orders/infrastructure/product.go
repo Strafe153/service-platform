@@ -16,26 +16,27 @@ func NewProductsRepository(c *DatabaseContext) *ProductsRepository {
 	return &ProductsRepository{c}
 }
 
-func (r *ProductsRepository) GetAll(c context.Context) ([]*domain.Product, error) {
+func (r *ProductsRepository) GetAll(page domain.Page, c context.Context) ([]domain.Product, error) {
 	ctx, cancel := configureMongoContext(c)
 	defer cancel()
 
 	collection := r.context.getProductsCollection()
+	opts := getPageOptions(page)
 
-	cursor, err := collection.Find(ctx, bson.D{})
+	cursor, err := collection.Find(ctx, bson.D{}, opts)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
-	var products []*domain.Product
+	var products []domain.Product
 	for cursor.Next(ctx) {
 		var product domain.Product
 		if err := cursor.Decode(&product); err != nil {
 			return nil, err
 		}
 
-		products = append(products, &product)
+		products = append(products, product)
 	}
 
 	return products, nil

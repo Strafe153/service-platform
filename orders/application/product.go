@@ -16,16 +16,15 @@ func NewProductsService(repository domain.ProductsRepository) *ProductsService {
 	return &ProductsService{repository: repository}
 }
 
-func (s *ProductsService) Get(c context.Context) ([]*domain.ProductResponse, error) {
-	products, err := s.repository.GetAll(c)
+func (s *ProductsService) Get(page domain.Page, c context.Context) ([]domain.ProductResponse, error) {
+	products, err := s.repository.GetAll(page, c)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]*domain.ProductResponse, len(products))
+	responses := make([]domain.ProductResponse, len(products))
 	for i, p := range products {
-		temp := p.ToResponse()
-		responses[i] = &temp
+		responses[i] = p.ToResponse()
 	}
 
 	return responses, nil

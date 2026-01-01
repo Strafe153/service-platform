@@ -57,8 +57,8 @@ type OrderResponse struct {
 }
 
 type OrdersRepository interface {
-	GetAll(c context.Context) ([]*Order, error)
-	GetByUserId(id string, c context.Context) ([]*Order, error)
+	GetAll(page Page, c context.Context) ([]Order, error)
+	GetByUserId(id string, page Page, c context.Context) ([]Order, error)
 	Get(id bson.ObjectID, c context.Context) (*Order, error)
 	Create(order *Order, c context.Context) (string, error)
 	Cancel(id bson.ObjectID, c context.Context) error

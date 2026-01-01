@@ -16,51 +16,53 @@ func NewOrdersRepository(c *DatabaseContext) *OrdersRepository {
 	return &OrdersRepository{c}
 }
 
-func (r *OrdersRepository) GetAll(c context.Context) ([]*domain.Order, error) {
+func (r *OrdersRepository) GetAll(page domain.Page, c context.Context) ([]domain.Order, error) {
 	ctx, cancel := configureMongoContext(c)
 	defer cancel()
 
 	collection := r.context.getOrdersCollection()
+	opts := getPageOptions(page)
 
-	cursor, err := collection.Find(ctx, bson.D{})
+	cursor, err := collection.Find(ctx, bson.D{}, opts)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
-	var orders []*domain.Order
+	var orders []domain.Order
 	for cursor.Next(ctx) {
 		var order domain.Order
 		if err := cursor.Decode(&order); err != nil {
 			return nil, err
 		}
 
-		orders = append(orders, &order)
+		orders = append(orders, order)
 	}
 
 	return orders, nil
 }
 
-func (r *OrdersRepository) GetByUserId(id string, c context.Context) ([]*domain.Order, error) {
+func (r *OrdersRepository) GetByUserId(id string, page domain.Page, c context.Context) ([]domain.Order, error) {
 	ctx, cancel := configureMongoContext(c)
 	defer cancel()
 
 	collection := r.context.getOrdersCollection()
+	opts := getPageOptions(page)
 
-	cursor, err := collection.Find(ctx, bson.D{{Key: "userId", Value: id}})
+	cursor, err := collection.Find(ctx, bson.D{{Key: "userId", Value: id}}, opts)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
-	var orders []*domain.Order
+	var orders []domain.Order
 	for cursor.Next(ctx) {
 		var order domain.Order
 		if err := cursor.Decode(&order); err != nil {
 			return nil, err
 		}
 
-		orders = append(orders, &order)
+		orders = append(orders, order)
 	}
 
 	return orders, nil

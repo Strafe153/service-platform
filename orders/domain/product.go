@@ -62,7 +62,7 @@ type ProductResponse struct {
 }
 
 type ProductsRepository interface {
-	GetAll(c context.Context) ([]*Product, error)
+	GetAll(page Page, c context.Context) ([]Product, error)
 	GetByIds(ids []bson.ObjectID, c context.Context) ([]Product, error)
 	Get(id bson.ObjectID, c context.Context) (*Product, error)
 	Create(product *Product, c context.Context) (string, error)

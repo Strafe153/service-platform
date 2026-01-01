@@ -19,7 +19,9 @@ func RegisterOrderEndpoints(mux *http.ServeMux, h *Handler, cfg *inf.KeycloakCon
 }
 
 func (h *Handler) getOrders(w http.ResponseWriter, r *http.Request) {
-	orders, err := h.ordersService.Get(r.Context())
+	page := readPageParams(r.URL.Query())
+
+	orders, err := h.ordersService.Get(page, r.Context())
 	if err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 		return
@@ -29,7 +31,7 @@ func (h *Handler) getOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getOrder(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id := readRouteId(r)
 
 	order, err := h.ordersService.GetById(id, r.Context())
 	if err != nil {
@@ -43,9 +45,10 @@ func (h *Handler) getOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getOrdersByUserId(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id := readRouteId(r)
+	page := readPageParams(r.URL.Query())
 
-	orders, err := h.ordersService.GetByUserId(id, r.Context())
+	orders, err := h.ordersService.GetByUserId(id, page, r.Context())
 	if err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 	}
@@ -75,7 +78,7 @@ func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) cancelOrder(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id := readRouteId(r)
 
 	if err := h.ordersService.Cancel(id, r.Context()); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)

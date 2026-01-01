@@ -49,7 +49,7 @@ func (p *AdminOrSameUserPolicy) verify(r *http.Request) error {
 		return nil
 	}
 
-	id := r.PathValue("id")
+	id := readRouteId(r)
 	if id != "" && id != p.claims.UserId {
 		return fmt.Errorf("Interaction with the user is not allowed")
 	}
