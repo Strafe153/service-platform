@@ -16,6 +16,6 @@ func NewAppError(errType string, message string) *AppError {
 	return &AppError{errType, message}
 }
 
-func (e AppError) Error() string {
+func (e *AppError) Error() string {
 	return e.message
 }
