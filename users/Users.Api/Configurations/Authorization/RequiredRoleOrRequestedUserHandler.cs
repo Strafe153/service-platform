@@ -16,7 +16,7 @@ public class RequiredRoleOrRequestedUserHandler
             return;
         }
 
-        var isSameUser = await IsSameUserRequested(context);
+        var isSameUser = IsSameUserRequested(context);
 
         if (!isSameUser)
         {
@@ -26,7 +26,7 @@ public class RequiredRoleOrRequestedUserHandler
         context.Succeed(requirement);
     }
 
-    private static async Task<bool> IsSameUserRequested(AuthorizationHandlerContext context)
+    private static bool IsSameUserRequested(AuthorizationHandlerContext context)
     {
         if (context.Resource is not HttpContext ctx
             || !ctx.Request.RouteValues.ContainsKey(KeycloakConstants.Id))
