@@ -9,10 +9,10 @@ import (
 )
 
 type DatabaseConfig struct {
-	Connection         string `json:"connection"`
-	Database           string `json:"database"`
-	OrdersCollection   string `json:"ordersCollection"`
-	ProductsCollection string `json:"productsCollection"`
+	Connection         string `yaml:"connection"`
+	Database           string `yaml:"database"`
+	OrdersCollection   string `yaml:"ordersCollection"`
+	ProductsCollection string `yaml:"productsCollection"`
 }
 
 type DatabaseContext struct {
