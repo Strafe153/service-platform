@@ -8,8 +8,8 @@ const (
 )
 
 type KeycloakConfig struct {
-	Url   string `json:"url"`
-	Realm string `json:"realm"`
+	Url   string `yaml:"url"`
+	Realm string `yaml:"realm"`
 }
 
 type ResourceAccessUser struct {

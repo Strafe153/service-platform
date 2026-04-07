@@ -1,44 +1,39 @@
 services:
   sql_server:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sql_server
+    container_name: users_db
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=pa5sw0rd!
       - MSSQL_PID=Developer
+      - SA_PASSWORD=${USERS_PASS}
     ports:
       - 1433:1433
     restart: always
     volumes:
       - sql_server_data:/var/opt/mssql
 
-  rabbitmq:
+  rabbit_mq:
     image: rabbitmq:4.2.0-management
-    container_name: rabbitmq_test
     environment:
-      - RABBITMQ_DEFAULT_USER=rabbit_user
-      - RABBITMQ_DEFAULT_PASS=rabbit_pass
+      - RABBITMQ_DEFAULT_USER=${RABBIT_MQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_MQ_PASS}
     ports:
       - 5672:5672
       - 15672:15672
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
-    container_name: keycloak
     environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASS}
     command: start-dev
     ports:
       - 8080:8080
-    # yet to check whether this volume works, but haven't done so as of now
-    # due to not wanting to lose current data
     volumes:
       - keycloak_data:/opt/keycloak/data
 
   mailpit:
-    image: axllent/mailpit
-    container_name: mailpit
+    image: axllent/mailpit:v1.29
     restart: unless-stopped
     volumes:
       - ./data:/data
@@ -48,12 +43,12 @@ services:
     environment:
       MP_MAX_MESSAGES: 5000
       MP_DATABASE: /data/mailpit.db
-      MP_SMTP_AUTH: test:Pa5sw0rd!
+      MP_SMTP_AUTH: ${MAILPIT_USER}:${MAILPIT_PASS}
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
-  mongodb:
+  mongo_db:
     image: mongo:7.0.13-rc0
-    container_name: mongodb
+    container_name: orders_db
     restart: always
     ports:
       - 27017:27017

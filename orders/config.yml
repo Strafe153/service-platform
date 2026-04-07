@@ -1,0 +1,16 @@
+database:
+  connection: mongodb://localhost:27017
+  database: local
+  ordersCollection: orders
+  productsCollection: products
+    
+rabbit_mq:
+  user: 
+  password: 
+  host: 
+  port: 
+  exchange: order
+  
+keycloak:
+  url: 
+  realm: users

@@ -8,11 +8,11 @@ import (
 )
 
 type RabbitMQConfig struct {
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	Exchange string `json:"exchange"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Exchange string `yaml:"exchange"`
 }
 
 func (c *RabbitMQConfig) getConnectionString() string {

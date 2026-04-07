@@ -29,6 +29,7 @@ func (r *Order) ToResponse() OrderResponse {
 	}
 
 	return OrderResponse{
+		Id:       r.Id.Hex(),
 		UserId:   r.UserId,
 		Products: products,
 		Status:   r.Status,
