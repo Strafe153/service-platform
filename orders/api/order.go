@@ -16,6 +16,7 @@ func RegisterOrderEndpoints(mux *http.ServeMux, h *Handler, cfg *inf.KeycloakCon
 	mux.Handle("GET /orders/user/{id}", AuthMiddleware(adminOrSameUserPolicy, cfg, h.getOrdersByUserId))
 	mux.Handle("POST /orders", AuthMiddleware(adminOrSameUserPolicy, cfg, h.createOrder))
 	mux.Handle("POST /orders/{id}/cancel", AuthMiddleware(adminOrSameUserPolicy, cfg, h.cancelOrder))
+	mux.Handle("POST /orders/{id}/complete", AuthMiddleware(adminOrSameUserPolicy, cfg, h.completeOrder))
 }
 
 func (h *Handler) getOrders(w http.ResponseWriter, r *http.Request) {
@@ -81,6 +82,17 @@ func (h *Handler) cancelOrder(w http.ResponseWriter, r *http.Request) {
 	id := readRouteId(r)
 
 	if err := h.ordersService.Cancel(id, r.Context()); err != nil {
+		writeProblem(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handler) completeOrder(w http.ResponseWriter, r *http.Request) {
+	id := readRouteId(r)
+
+	if err := h.ordersService.Complete(id, r.Context()); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 		return
 	}

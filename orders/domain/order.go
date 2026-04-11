@@ -7,19 +7,19 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type orderStatus int
+type OrderStatus int
 
 const (
-	ActiveOrder    orderStatus = 1
-	CompletedOrder orderStatus = 2
-	CancelledOrder orderStatus = 3
+	ActiveOrder    OrderStatus = 1
+	CompletedOrder OrderStatus = 2
+	CancelledOrder OrderStatus = 3
 )
 
 type Order struct {
 	Id       bson.ObjectID `bson:"_id,omitempty"`
 	UserId   string        `bson:"userId"`
 	Products []Product     `bson:"product"`
-	Status   orderStatus   `bson:"status"`
+	Status   OrderStatus   `bson:"status"`
 }
 
 func (r *Order) ToResponse() OrderResponse {
@@ -54,7 +54,7 @@ type OrderResponse struct {
 	Id       string            `json:"id"`
 	UserId   string            `json:"userId"`
 	Products []ProductResponse `json:"products"`
-	Status   orderStatus       `json:"status"`
+	Status   OrderStatus       `json:"status"`
 }
 
 type OrdersRepository interface {
@@ -63,10 +63,16 @@ type OrdersRepository interface {
 	Get(id bson.ObjectID, c context.Context) (*Order, error)
 	Create(order *Order, c context.Context) (string, error)
 	Cancel(id bson.ObjectID, c context.Context) error
+	Complete(id bson.ObjectID, c context.Context) error
 }
 
 type OrderCreatedEvent struct {
 	Email       string    `json:"email"`
 	OrderNumber string    `json:"orderNumber"`
 	CreatedAt   time.Time `json:"createdAt"`
+}
+
+type OrderCompletedEvent struct {
+	OrderId     string    `json:"orderId"`
+	CompletedAt time.Time `json:"completedAt"`
 }

@@ -113,18 +113,59 @@ func (s *OrdersService) Create(
 	response := order.ToResponse()
 	response.Id = id
 
-	publishOrderCreated(s, c, &response)
+	if err = publishOrderCreated(s, c, &response); err != nil {
+		return nil, domain.NewAppError(domain.ErrBadRequest, err.Error())
+	}
 
 	return &response, nil
 }
 
-func (s *OrdersService) Cancel(id string, c context.Context) error {
+func (s *OrdersService) Cancel(id string, c context.Context) *domain.AppError {
 	oId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return domain.NewAppError(domain.ErrBadRequest, err.Error())
 	}
 
-	return s.ordersRepo.Cancel(oId, c)
+	order, err := s.ordersRepo.Get(oId, c)
+	if err != nil {
+		return domain.NewAppError(domain.ErrNotFound, err.Error())
+	}
+
+	if order.Status == domain.CompletedOrder {
+		return domain.NewAppError(domain.ErrBadRequest, "Completed order cannot be cancelled")
+	}
+
+	if err = s.ordersRepo.Cancel(oId, c); err != nil {
+		return domain.NewAppError(domain.ErrBadRequest, "Failed to cancel the order")
+	}
+
+	return nil
+}
+
+func (s *OrdersService) Complete(id string, c context.Context) *domain.AppError {
+	oId, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return domain.NewAppError(domain.ErrBadRequest, err.Error())
+	}
+
+	order, err := s.ordersRepo.Get(oId, c)
+	if err != nil {
+		return domain.NewAppError(domain.ErrNotFound, err.Error())
+	}
+
+	if order.Status == domain.CancelledOrder {
+		return domain.NewAppError(domain.ErrBadRequest, "Cancelled order cannot be completed")
+	}
+
+	if err = s.ordersRepo.Complete(oId, c); err != nil {
+		return domain.NewAppError(domain.ErrBadRequest, "Failed to complete the order")
+	}
+
+	if err = publishOrderCompleted(s, order); err != nil {
+		return domain.NewAppError(domain.ErrBadRequest, "Failed to publish order completed event")
+	}
+
+	return nil
 }
 
 func (s *OrdersService) getProducts(
@@ -141,7 +182,22 @@ func (s *OrdersService) getProducts(
 		productIds[i] = oId
 	}
 
-	return s.productsRepo.GetByIds(productIds, c)
+	products, err := s.productsRepo.GetByIds(productIds, c)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range products {
+		for _, r := range r.Products {
+			product := &products[i]
+
+			if product.Id.Hex() == r.Id {
+				product.Count = r.Count
+			}
+		}
+	}
+
+	return products, nil
 }
 
 func publishOrderCreated(s *OrdersService, c context.Context, r *domain.OrderResponse) error {
@@ -170,4 +226,29 @@ func publishOrderCreated(s *OrdersService, c context.Context, r *domain.OrderRes
 	}
 
 	return s.msgProvider.Publish("order.created", msgData)
+}
+
+func publishOrderCompleted(s *OrdersService, r *domain.Order) error {
+	err := s.msgProvider.Connect()
+	if err != nil {
+		return err
+	}
+	defer s.msgProvider.Close()
+
+	event := domain.OrderCompletedEvent{
+		OrderId:     r.Id.Hex(),
+		CompletedAt: time.Now().UTC(),
+	}
+
+	wrapper, err := domain.WrapMessage(event)
+	if err != nil {
+		return err
+	}
+
+	msgData, err := json.Marshal(wrapper)
+	if err != nil {
+		return err
+	}
+
+	return s.msgProvider.Publish("order.completed", msgData)
 }

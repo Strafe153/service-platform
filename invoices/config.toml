@@ -1,0 +1,12 @@
+[database]
+port = 5432
+host = "localhost"
+user = ""
+password = ""
+name = "invoices"
+
+[queue]
+port = 5672
+host = "localhost"
+user = ""
+password = ""
