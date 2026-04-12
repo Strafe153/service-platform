@@ -102,6 +102,14 @@ func (r *OrdersRepository) Create(order *domain.Order, c context.Context) (strin
 }
 
 func (r *OrdersRepository) Cancel(id bson.ObjectID, c context.Context) error {
+	return r.changeStatus(id, domain.CancelledOrder, c)
+}
+
+func (r *OrdersRepository) Complete(id bson.ObjectID, c context.Context) error {
+	return r.changeStatus(id, domain.CompletedOrder, c)
+}
+
+func (r *OrdersRepository) changeStatus(id bson.ObjectID, s domain.OrderStatus, c context.Context) error {
 	ctx, cancel := configureMongoContext(c)
 	defer cancel()
 
@@ -110,7 +118,7 @@ func (r *OrdersRepository) Cancel(id bson.ObjectID, c context.Context) error {
 	_, err := collection.UpdateOne(
 		ctx,
 		bson.D{{Key: "_id", Value: id}},
-		bson.D{{Key: "$set", Value: bson.D{{Key: "status", Value: domain.CancelledOrder}}}})
+		bson.D{{Key: "$set", Value: bson.D{{Key: "status", Value: s}}}})
 
 	return err
 }

@@ -55,7 +55,21 @@ services:
     volumes:
       - mongodb-data:/data/db
 
+  postgres:
+    image: postgres:14.22
+    container_name: invoices_db
+    environment:
+      POSTGRES_USER: ${INVOICES_USER}
+      POSTGRES_PASSWORD: ${INVOICES_PASS}
+      POSTGRES_DB: ${INVOICES_DB}
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 volumes:
   sql_server_data:
   keycloak_data:
   mongodb-data:
+  postgres_data:

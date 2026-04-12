@@ -2,8 +2,8 @@
     "rabbit_mq": {
         "user": "",
         "password": "",
-        "host": "",
-        "port": 0,
+        "host": "localhost",
+        "port": 5672,
         "exchanges": [
             {
                 "name": "user",
@@ -32,9 +32,9 @@
         ]
     },
     "mailpit": {
-        "host": "",
-        "port": 0,
-        "sender": "",
+        "host": "localhost",
+        "port": 1025,
+        "sender": "test@test.com",
         "user": "",
         "password": ""
     }

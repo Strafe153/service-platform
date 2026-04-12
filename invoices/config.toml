@@ -1,0 +1,17 @@
+[database]
+port = 5432
+host = "localhost"
+user = ""
+password = ""
+name = "invoices"
+
+[broker]
+port = 5672
+host = "localhost"
+user = ""
+password = ""
+
+[broker.exchange]
+name = "order"
+queue = "order-completed"
+key = "order.completed"
