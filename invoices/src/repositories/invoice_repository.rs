@@ -3,22 +3,17 @@ use std::error::Error;
 use tokio_postgres::Client;
 use uuid::Uuid;
 
-use crate::entities::invoice::Invoice;
+use crate::{dto::invoice_dto::InvoiceCreateDto, entities::invoice::Invoice};
 
 #[async_trait]
-pub trait InvoiceRepository {
+pub trait InvoiceRepository: Send + Sync {
     async fn get(&self, skip: i64, take: i64) -> Result<Vec<Invoice>, Box<dyn Error>>;
     async fn get_by_id(&self, id: Uuid) -> Result<Invoice, Box<dyn Error>>;
+    async fn create(&self, dto: InvoiceCreateDto) -> Result<(), Box<dyn Error>>;
 }
 
 pub struct PostgresInvoiceRepository {
     pub client: Client,
-}
-
-impl PostgresInvoiceRepository {
-    pub fn new(client: Client) -> Self {
-        Self { client }
-    }
 }
 
 #[async_trait]
@@ -49,11 +44,19 @@ impl InvoiceRepository for PostgresInvoiceRepository {
             )
             .await?;
 
-        // most likely check if row exists and return not found error and map that to a not found,
-        // otherwise bad request
-
         let invoice = Invoice::new(row.get(0), row.get(1), row.get(2));
 
         Ok(invoice)
+    }
+
+    async fn create(&self, dto: InvoiceCreateDto) -> Result<(), Box<dyn Error>> {
+        self.client
+            .execute(
+                "INSERT INTO invoices(orderId, createdAt) VALUES ($1, $2)",
+                &[&dto.order_id, &dto.created_at],
+            )
+            .await?;
+
+        Ok(())
     }
 }

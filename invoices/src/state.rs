@@ -1,11 +1,13 @@
+use std::sync::Arc;
+
 use crate::services::invoice_service::InvoiceService;
 
-pub struct AppState<S: InvoiceService> {
-    pub service: S,
+pub struct AppState {
+    pub service: Arc<dyn InvoiceService>,
 }
 
-impl<S: InvoiceService> AppState<S> {
-    pub fn new(service: S) -> Self {
+impl AppState {
+    pub fn new(service: Arc<dyn InvoiceService>) -> Self {
         Self { service }
     }
 }

@@ -1,14 +1,20 @@
 use axum::{Router, routing::get};
-use lapin::{Connection, ConnectionProperties, options::QueueBindOptions, types::FieldTable};
+use futures_lite::stream::StreamExt;
+use lapin::{
+    Connection, ConnectionProperties,
+    options::{BasicAckOptions, BasicConsumeOptions, QueueBindOptions},
+    types::FieldTable,
+};
 use refinery::embed_migrations;
 use serde::Deserialize;
 use std::{error::Error, fs, sync::Arc};
 use tokio_postgres::{Client, NoTls};
 
 use crate::{
+    dto::invoice_dto::InvoiceCreateDto,
     handlers::invoice_handler::{get_by_id, get_page},
-    repositories::invoice_repository::PostgresInvoiceRepository,
-    services::invoice_service::InvoiceServiceImpl,
+    models::message_wrapper::MessageWrapper,
+    services::invoice_service::InvoiceService,
     state::AppState,
 };
 
@@ -22,24 +28,32 @@ pub struct Database {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Queue {
+pub struct Broker {
     port: i32,
     host: String,
     user: String,
     password: String,
+    exchange: Exchange,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Exchange {
+    name: String,
+    queue: String,
+    key: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
     database: Database,
-    queue: Queue,
+    broker: Broker,
 }
 
 impl Config {
     fn queue_connection_string(&self) -> String {
         format!(
             "amqp://{}:{}@{}:{}",
-            self.queue.user, self.queue.password, self.queue.host, self.queue.port
+            self.broker.user, self.broker.password, self.broker.host, self.broker.port
         )
     }
 
@@ -71,7 +85,7 @@ pub async fn configure_database(config: &Config) -> Result<Client, Box<dyn Error
 
     tokio::spawn(async move {
         if let Err(e) = connection.await {
-            println!("Connection error: {}", e);
+            eprintln!("Connection error: {:?}", e);
         }
     });
 
@@ -81,38 +95,72 @@ pub async fn configure_database(config: &Config) -> Result<Client, Box<dyn Error
     Ok(client)
 }
 
-pub async fn configure_messaging(config: &Config) -> Result<(), Box<dyn Error>> {
-    let conn_string = config.queue_connection_string();
-
+pub async fn configure_messaging(
+    config: &Config,
+    service: Arc<dyn InvoiceService>,
+) -> Result<(), Box<dyn Error>> {
+    let connection_string = config.queue_connection_string();
     let runtime = lapin::runtime::default_runtime()?;
 
     let conn = Connection::connect_with_runtime(
-        &conn_string,
+        &connection_string,
         ConnectionProperties::default().with_connection_name("invoices".into()),
         runtime,
     )
     .await?;
 
-    let ch = conn.create_channel().await?;
+    let channel = conn.create_channel().await?;
 
-    ch.queue_bind(
-        "order-completed".into(),
-        "order".into(),
-        "order.completed".into(),
-        QueueBindOptions::default(),
-        FieldTable::default(),
-    )
-    .await?;
+    channel
+        .queue_bind(
+            config.broker.exchange.queue.as_str().into(),
+            config.broker.exchange.name.as_str().into(),
+            config.broker.exchange.key.as_str().into(),
+            QueueBindOptions::default(),
+            FieldTable::default(),
+        )
+        .await?;
 
-    // yet to finish
+    let mut consumer = channel
+        .basic_consume(
+            config.broker.exchange.queue.as_str().into(),
+            config.broker.exchange.key.as_str().into(),
+            BasicConsumeOptions::default(),
+            FieldTable::default(),
+        )
+        .await?;
+
+    tokio::spawn(async move {
+        while let Some(delivery_result) = consumer.next().await {
+            match delivery_result {
+                Ok(delivery) => {
+                    let message: Result<MessageWrapper<InvoiceCreateDto>, serde_json::Error> =
+                        serde_json::from_slice(&delivery.data);
+
+                    match message {
+                        Ok(dto) => {
+                            if let Err(e) = service.create(dto.message).await {
+                                println!("{}", e);
+                                continue;
+                            }
+                        }
+                        Err(e) => eprintln!("Deserialization error: {:?}", e),
+                    }
+
+                    if let Err(e) = delivery.ack(BasicAckOptions::default()).await {
+                        eprintln!("Acknowledgment error: {:?}", e);
+                    }
+                }
+                Err(e) => eprintln!("Consumer error: {:?}", e),
+            }
+        }
+    });
 
     Ok(())
 }
 
-pub async fn configure_axum(client: Client) -> Result<(), Box<dyn Error>> {
-    let state = Arc::new(AppState::new(InvoiceServiceImpl::new(
-        PostgresInvoiceRepository::new(client),
-    )));
+pub async fn configure_http(service: Arc<dyn InvoiceService>) -> Result<(), Box<dyn Error>> {
+    let state = Arc::new(AppState::new(service));
 
     let app = Router::new()
         .route("/invoices", get(get_page))

@@ -1,5 +1,5 @@
-use chrono::NaiveDateTime;
-use serde::Serialize;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::entities::invoice::Invoice;
@@ -9,7 +9,7 @@ use crate::entities::invoice::Invoice;
 pub struct InvoiceReadDto {
     id: Uuid,
     order_id: String,
-    created_at: NaiveDateTime,
+    created_at: DateTime<Utc>,
 }
 
 impl From<Invoice> for InvoiceReadDto {
@@ -20,4 +20,12 @@ impl From<Invoice> for InvoiceReadDto {
             created_at: value.created_at,
         }
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct InvoiceCreateDto {
+    #[serde(rename = "orderId")]
+    pub order_id: String,
+    #[serde(rename = "completedAt")]
+    pub created_at: DateTime<Utc>,
 }

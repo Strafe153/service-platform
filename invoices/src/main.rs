@@ -1,10 +1,12 @@
-use std::error::Error;
+use std::{error::Error, sync::Arc};
 
 use tokio;
 
 use crate::{
-    config::{configure_axum, configure_database, configure_messaging},
+    config::{configure_database, configure_http, configure_messaging},
     models::page::Page,
+    repositories::invoice_repository::PostgresInvoiceRepository,
+    services::invoice_service::InvoiceServiceImpl,
     state::AppState,
 };
 
@@ -22,9 +24,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let config = config::read_config()?;
 
     let client = configure_database(&config).await?;
+    let service = Arc::new(InvoiceServiceImpl {
+        repository: PostgresInvoiceRepository { client },
+    });
 
-    configure_messaging(&config).await?;
-    configure_axum(client).await?;
+    configure_messaging(&config, service.clone()).await?;
+    configure_http(service.clone()).await?;
 
     Ok(())
 }

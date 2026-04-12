@@ -8,17 +8,9 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::{
-    AppState,
-    models::page::Page,
-    repositories::invoice_repository::PostgresInvoiceRepository,
-    services::invoice_service::{InvoiceService, InvoiceServiceImpl},
-};
+use crate::{AppState, models::page::Page};
 
-pub async fn get_by_id(
-    State(state): State<Arc<AppState<InvoiceServiceImpl<PostgresInvoiceRepository>>>>,
-    Path(id): Path<Uuid>,
-) -> Response {
+pub async fn get_by_id(State(state): State<Arc<AppState>>, Path(id): Path<Uuid>) -> Response {
     let result = state.service.get_by_id(id).await;
 
     match result {
@@ -27,10 +19,7 @@ pub async fn get_by_id(
     }
 }
 
-pub async fn get_page(
-    State(state): State<Arc<AppState<InvoiceServiceImpl<PostgresInvoiceRepository>>>>,
-    Query(page): Query<Page>,
-) -> Response {
+pub async fn get_page(State(state): State<Arc<AppState>>, Query(page): Query<Page>) -> Response {
     let result = state.service.get(page).await;
 
     match result {

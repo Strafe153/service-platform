@@ -5,8 +5,13 @@ user = ""
 password = ""
 name = "invoices"
 
-[queue]
+[broker]
 port = 5672
 host = "localhost"
 user = ""
 password = ""
+
+[broker.exchange]
+name = "order"
+queue = "order-completed"
+key = "order.completed"
