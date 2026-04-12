@@ -22,7 +22,7 @@ impl From<Invoice> for InvoiceReadDto {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct InvoiceCreateDto {
     #[serde(rename = "orderId")]
     pub order_id: String,

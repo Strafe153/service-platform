@@ -18,7 +18,7 @@ use crate::{
     state::AppState,
 };
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Database {
     port: i32,
     host: String,
@@ -27,7 +27,7 @@ pub struct Database {
     name: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Broker {
     port: i32,
     host: String,
@@ -36,14 +36,14 @@ pub struct Broker {
     exchange: Exchange,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Exchange {
     name: String,
     queue: String,
     key: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Config {
     database: Database,
     broker: Broker,
