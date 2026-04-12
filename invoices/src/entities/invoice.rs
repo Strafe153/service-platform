@@ -8,11 +8,11 @@ pub struct Invoice {
 }
 
 impl Invoice {
-    pub fn new(id: Uuid, order_id: String, created_date: DateTime<Utc>) -> Self {
+    pub fn new(id: Uuid, order_id: String, created_at: DateTime<Utc>) -> Self {
         Self {
             id,
             order_id,
-            created_at: created_date,
+            created_at,
         }
     }
 }
