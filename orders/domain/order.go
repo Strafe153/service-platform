@@ -22,39 +22,9 @@ type Order struct {
 	Status   OrderStatus   `bson:"status"`
 }
 
-func (r *Order) ToResponse() OrderResponse {
-	products := make([]ProductResponse, len(r.Products))
-	for i, p := range r.Products {
-		products[i] = p.ToResponse()
-	}
-
-	return OrderResponse{
-		Id:       r.Id.Hex(),
-		UserId:   r.UserId,
-		Products: products,
-		Status:   r.Status,
-	}
-}
-
 type OrderProduct struct {
 	Id    string `json:"id" validate:"required,alphanum,min=24,max=24"`
 	Count int    `json:"count" validate:"required,min=1,max=9999"`
-}
-
-type CreateOrderRequest struct {
-	UserId   string         `json:"userId" validate:"required,alphanum,min=26,max=26"`
-	Products []OrderProduct `json:"products" validate:"required,min=1,max=999,dive"`
-}
-
-func (r *CreateOrderRequest) ToOrder() Order {
-	return Order{UserId: r.UserId}
-}
-
-type OrderResponse struct {
-	Id       string            `json:"id"`
-	UserId   string            `json:"userId"`
-	Products []ProductResponse `json:"products"`
-	Status   OrderStatus       `json:"status"`
 }
 
 type OrdersRepository interface {

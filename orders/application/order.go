@@ -11,6 +11,36 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
+type CreateOrderRequest struct {
+	UserId   string                `json:"userId" validate:"required,alphanum,min=26,max=26"`
+	Products []domain.OrderProduct `json:"products" validate:"required,min=1,max=999,dive"`
+}
+
+func (r *CreateOrderRequest) ToOrder() domain.Order {
+	return domain.Order{UserId: r.UserId}
+}
+
+type OrderResponse struct {
+	Id       string             `json:"id"`
+	UserId   string             `json:"userId"`
+	Products []ProductResponse  `json:"products"`
+	Status   domain.OrderStatus `json:"status"`
+}
+
+func newOrderResponse(r *domain.Order) OrderResponse {
+	products := make([]ProductResponse, len(r.Products))
+	for i, p := range r.Products {
+		products[i] = newProductResponse(&p)
+	}
+
+	return OrderResponse{
+		Id:       r.Id.Hex(),
+		UserId:   r.UserId,
+		Products: products,
+		Status:   r.Status,
+	}
+}
+
 type OrdersService struct {
 	ordersRepo   domain.OrdersRepository
 	productsRepo domain.ProductsRepository
@@ -25,21 +55,21 @@ func NewOrdersService(
 	return &OrdersService{o, p, m}
 }
 
-func (s *OrdersService) Get(page domain.Page, c context.Context) ([]domain.OrderResponse, error) {
+func (s *OrdersService) Get(page domain.Page, c context.Context) ([]OrderResponse, error) {
 	orders, err := s.ordersRepo.GetAll(page, c)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]domain.OrderResponse, len(orders))
+	responses := make([]OrderResponse, len(orders))
 	for i, o := range orders {
-		responses[i] = o.ToResponse()
+		responses[i] = newOrderResponse(&o)
 	}
 
 	return responses, nil
 }
 
-func (s *OrdersService) GetById(id string, c context.Context) (*domain.OrderResponse, *domain.AppError) {
+func (s *OrdersService) GetById(id string, c context.Context) (*OrderResponse, *domain.AppError) {
 	oId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, domain.NewAppError(domain.ErrBadRequest, err.Error())
@@ -57,7 +87,7 @@ func (s *OrdersService) GetById(id string, c context.Context) (*domain.OrderResp
 		return nil, domain.NewAppError(domain.ErrForbidden, "Access forbidden")
 	}
 
-	response := order.ToResponse()
+	response := newOrderResponse(order)
 
 	return &response, nil
 }
@@ -66,24 +96,24 @@ func (s *OrdersService) GetByUserId(
 	id string,
 	page domain.Page,
 	c context.Context,
-) ([]domain.OrderResponse, error) {
+) ([]OrderResponse, error) {
 	orders, err := s.ordersRepo.GetByUserId(id, page, c)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]domain.OrderResponse, len(orders))
+	responses := make([]OrderResponse, len(orders))
 	for i, o := range orders {
-		responses[i] = o.ToResponse()
+		responses[i] = newOrderResponse(&o)
 	}
 
 	return responses, nil
 }
 
 func (s *OrdersService) Create(
-	r *domain.CreateOrderRequest,
+	r *CreateOrderRequest,
 	c context.Context,
-) (*domain.OrderResponse, *domain.AppError) {
+) (*OrderResponse, *domain.AppError) {
 	isAdmin := c.Value(inf.IsAdmin).(bool)
 	userId := c.Value(inf.UserIdClaim)
 
@@ -110,7 +140,7 @@ func (s *OrdersService) Create(
 		return nil, domain.NewAppError(domain.ErrBadRequest, err.Error())
 	}
 
-	response := order.ToResponse()
+	response := newOrderResponse(&order)
 	response.Id = id
 
 	if err = publishOrderCreated(s, c, &response); err != nil {
@@ -169,7 +199,7 @@ func (s *OrdersService) Complete(id string, c context.Context) *domain.AppError 
 }
 
 func (s *OrdersService) getProducts(
-	r *domain.CreateOrderRequest,
+	r *CreateOrderRequest,
 	c context.Context,
 ) ([]domain.Product, error) {
 	productIds := make([]bson.ObjectID, len(r.Products))
@@ -200,7 +230,7 @@ func (s *OrdersService) getProducts(
 	return products, nil
 }
 
-func publishOrderCreated(s *OrdersService, c context.Context, r *domain.OrderResponse) error {
+func publishOrderCreated(s *OrdersService, c context.Context, r *OrderResponse) error {
 	err := s.msgProvider.Connect()
 	if err != nil {
 		return err

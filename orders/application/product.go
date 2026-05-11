@@ -8,6 +8,42 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
+type CreateProductRequest struct {
+	Name  string  `json:"name" validate:"required,min=3,max=100"`
+	Price float64 `json:"price" validate:"required,gte=1.0,lte=999999.99"`
+	Count int     `json:"count" validate:"required,min=1,max=99999"`
+}
+
+func (r *CreateProductRequest) ToProduct() domain.Product {
+	return domain.Product{
+		Name:  r.Name,
+		Price: r.Price,
+		Count: r.Count,
+	}
+}
+
+type UpdateProductRequest struct {
+	Name  string  `json:"name" validate:"required,min=3,max=100"`
+	Price float64 `json:"price" validate:"required,gte=1.0,lte=999999.99"`
+	Count int     `json:"count" validate:"required,min=1,max=99999"`
+}
+
+func (r *UpdateProductRequest) ToProduct() domain.Product {
+	return domain.Product{
+		Name:  r.Name,
+		Price: r.Price,
+		Count: r.Count,
+	}
+}
+
+type ProductResponse struct {
+	Id          string  `json:"id"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	Count       int     `json:"count"`
+	IsAvailable bool    `json:"isAvailable"`
+}
+
 type ProductsService struct {
 	repository domain.ProductsRepository
 }
@@ -16,21 +52,21 @@ func NewProductsService(repository domain.ProductsRepository) *ProductsService {
 	return &ProductsService{repository: repository}
 }
 
-func (s *ProductsService) Get(page domain.Page, c context.Context) ([]domain.ProductResponse, error) {
+func (s *ProductsService) Get(page domain.Page, c context.Context) ([]ProductResponse, error) {
 	products, err := s.repository.GetAll(page, c)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]domain.ProductResponse, len(products))
+	responses := make([]ProductResponse, len(products))
 	for i, p := range products {
-		responses[i] = p.ToResponse()
+		responses[i] = newProductResponse(&p)
 	}
 
 	return responses, nil
 }
 
-func (s *ProductsService) GetById(id string, c context.Context) (*domain.ProductResponse, error) {
+func (s *ProductsService) GetById(id string, c context.Context) (*ProductResponse, error) {
 	oId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -41,15 +77,15 @@ func (s *ProductsService) GetById(id string, c context.Context) (*domain.Product
 		return nil, err
 	}
 
-	response := product.ToResponse()
+	response := newProductResponse(product)
 
 	return &response, nil
 }
 
 func (s *ProductsService) Create(
-	request *domain.CreateProductRequest,
+	request *CreateProductRequest,
 	c context.Context,
-) (*domain.ProductResponse, error) {
+) (*ProductResponse, error) {
 	validate := validator.New()
 	if err := validate.Struct(request); err != nil {
 		return nil, err
@@ -63,7 +99,7 @@ func (s *ProductsService) Create(
 		return nil, err
 	}
 
-	response := product.ToResponse()
+	response := newProductResponse(&product)
 	response.Id = id
 
 	return &response, nil
@@ -71,7 +107,7 @@ func (s *ProductsService) Create(
 
 func (s *ProductsService) Update(
 	id string,
-	request *domain.UpdateProductRequest,
+	request *UpdateProductRequest,
 	c context.Context,
 ) error {
 	oId, err := bson.ObjectIDFromHex(id)
@@ -102,4 +138,14 @@ func (s *ProductsService) Discontinue(id string, c context.Context) error {
 	}
 
 	return s.repository.Discontinue(oId, c)
+}
+
+func newProductResponse(p *domain.Product) ProductResponse {
+	return ProductResponse{
+		Id:          p.Id.Hex(),
+		Name:        p.Name,
+		Price:       p.Price,
+		Count:       p.Count,
+		IsAvailable: p.IsAvailable,
+	}
 }

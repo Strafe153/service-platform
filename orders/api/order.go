@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"orders/domain"
+	app "orders/application"
 	inf "orders/infrastructure"
 )
 
@@ -58,7 +58,7 @@ func (h *Handler) getOrdersByUserId(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
-	var request domain.CreateOrderRequest
+	var request app.CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 		return

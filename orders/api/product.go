@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"orders/domain"
+	app "orders/application"
 	inf "orders/infrastructure"
 )
 
@@ -43,7 +43,7 @@ func (h *Handler) getProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createProduct(w http.ResponseWriter, r *http.Request) {
-	var request domain.CreateProductRequest
+	var request app.CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 		return
@@ -64,7 +64,7 @@ func (h *Handler) createProduct(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) updateProduct(w http.ResponseWriter, r *http.Request) {
 	id := readRouteId(r)
 
-	var request domain.UpdateProductRequest
+	var request app.UpdateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		writeProblem(w, r, http.StatusBadRequest, err)
 		return
