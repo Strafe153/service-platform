@@ -27,20 +27,6 @@ type OrderResponse struct {
 	Status   domain.OrderStatus `json:"status"`
 }
 
-func newOrderResponse(r *domain.Order) OrderResponse {
-	products := make([]ProductResponse, len(r.Products))
-	for i, p := range r.Products {
-		products[i] = newProductResponse(&p)
-	}
-
-	return OrderResponse{
-		Id:       r.Id.Hex(),
-		UserId:   r.UserId,
-		Products: products,
-		Status:   r.Status,
-	}
-}
-
 type OrdersService struct {
 	ordersRepo   domain.OrdersRepository
 	productsRepo domain.ProductsRepository
@@ -281,4 +267,18 @@ func publishOrderCompleted(s *OrdersService, r *domain.Order) error {
 	}
 
 	return s.msgProvider.Publish("order.completed", msgData)
+}
+
+func newOrderResponse(r *domain.Order) OrderResponse {
+	products := make([]ProductResponse, len(r.Products))
+	for i, p := range r.Products {
+		products[i] = newProductResponse(&p)
+	}
+
+	return OrderResponse{
+		Id:       r.Id.Hex(),
+		UserId:   r.UserId,
+		Products: products,
+		Status:   r.Status,
+	}
 }
