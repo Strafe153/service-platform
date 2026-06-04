@@ -445,16 +445,8 @@
           "System.Drawing.Common": "6.0.0"
         }
       },
-      "Ulid": {
-        "type": "Transitive",
-        "resolved": "1.4.1",
-        "contentHash": "V6crLJ8a29raWeNwxYGfH9RTKA3H0nR0D9LAGzN3KtEsbiiaWkUjDor6OT5Oz7pxCK+NaY2hu2FLoYEOa8oCkA=="
-      },
       "users.domain": {
-        "type": "Project",
-        "dependencies": {
-          "Ulid": "[1.4.1, 1.4.1]"
-        }
+        "type": "Project"
       }
     }
   }

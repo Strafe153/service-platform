@@ -69,11 +69,11 @@ public static class UserEndpoints
 
     public static async Task<NoContent> Update(
         [FromServices] ISender sender,
-        [FromRoute] Ulid id,
+        [FromRoute] Guid id,
         [FromBody] UpdateUserCommand command,
         CancellationToken cancellationToken)
     {
-        IdentifiedCommand<Ulid, UpdateUserCommand> identifiedCommand = new(id, command);
+        IdentifiedCommand<Guid, UpdateUserCommand> identifiedCommand = new(id, command);
         await sender.Send(identifiedCommand, cancellationToken);
 
         return TypedResults.NoContent();
@@ -81,11 +81,11 @@ public static class UserEndpoints
 
     public static async Task<NoContent> UpdateAddress(
         [FromServices] ISender sender,
-        [FromRoute] Ulid id,
+        [FromRoute] Guid id,
         [FromBody] UpdateAddressCommand command,
         CancellationToken cancellationToken)
     {
-        IdentifiedCommand<Ulid, UpdateAddressCommand> identifiedCommand = new(id, command);
+        IdentifiedCommand<Guid, UpdateAddressCommand> identifiedCommand = new(id, command);
         await sender.Send(identifiedCommand, cancellationToken);
 
         return TypedResults.NoContent();

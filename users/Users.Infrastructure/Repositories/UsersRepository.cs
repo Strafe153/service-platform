@@ -14,7 +14,7 @@ public class UsersRepository : IUsersRepository
 
     public IQueryable<User> Get() => _context.Users;
 
-    public Task<User?> GetByIdAsync(Ulid id, CancellationToken cancellationToken) =>
+    public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
     public void Add(User user) => _context.Users.Add(user);

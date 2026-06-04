@@ -4,7 +4,7 @@ public interface IUsersRepository
 {
     IQueryable<User> Get();
 
-    Task<User?> GetByIdAsync(Ulid id, CancellationToken cancellationToken);
+    Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
     void Add(User user);
 

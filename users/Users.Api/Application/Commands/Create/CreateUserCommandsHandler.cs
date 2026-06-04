@@ -125,7 +125,7 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
 
     private Task<HttpResponseMessage> SetUserIdAttributeAsync(
         UserRepresentation keycloakUser,
-        Ulid dbUserId,
+        Guid dbUserId,
         CancellationToken cancellationToken)
     {
         keycloakUser.Attributes = new Dictionary<string, ICollection<string>>()

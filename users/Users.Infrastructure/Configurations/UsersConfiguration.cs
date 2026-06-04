@@ -10,12 +10,6 @@ public class UsersConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(b => b.Id);
 
-        builder.Property(b => b.Id).HasMaxLength(26);
-
-        builder.Property(b => b.Id).HasConversion(
-            u => u.ToString(),
-            s => Ulid.Parse(s));
-
         builder.Property(b => b.Email)
             .HasMaxLength(50)
             .IsRequired();

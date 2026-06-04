@@ -1,7 +1,7 @@
 namespace Users.Api.Application.Queries.Dto;
 
 public sealed record UserReadDto(
-    Ulid Id,
+    Guid Id,
     string Email,
     string FirstName,
     string LastName,

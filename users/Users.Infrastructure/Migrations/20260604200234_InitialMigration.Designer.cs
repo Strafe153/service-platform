@@ -12,8 +12,8 @@ using Users.Infrastructure;
 namespace Users.Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20251129194507_Initial")]
-    partial class Initial
+    [Migration("20260604200234_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,9 +27,9 @@ namespace Users.Infrastructure.Migrations
 
             modelBuilder.Entity("Users.Domain.Aggregates.User.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AuthProviderId")
                         .IsRequired()
@@ -61,6 +61,11 @@ namespace Users.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AuthProviderId")
+                        .HasDatabaseName("IX_Users_AuthProviderId");
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("AuthProviderId"), false);
+
                     b.ToTable("Users", (string)null);
                 });
 
@@ -68,27 +73,32 @@ namespace Users.Infrastructure.Migrations
                 {
                     b.OwnsOne("Users.Domain.Aggregates.User.Address", "Address", b1 =>
                         {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("nvarchar(26)");
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("City")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("Country")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(60)
+                                .HasColumnType("nvarchar(60)");
 
                             b1.Property<string>("State")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("Street")
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(10)
+                                .HasColumnType("nvarchar(10)");
 
                             b1.HasKey("UserId");
 

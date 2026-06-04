@@ -24,9 +24,9 @@ namespace Users.Infrastructure.Migrations
 
             modelBuilder.Entity("Users.Domain.Aggregates.User.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AuthProviderId")
                         .IsRequired()
@@ -70,8 +70,8 @@ namespace Users.Infrastructure.Migrations
                 {
                     b.OwnsOne("Users.Domain.Aggregates.User.Address", "Address", b1 =>
                         {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("nvarchar(26)");
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("City")
                                 .IsRequired()

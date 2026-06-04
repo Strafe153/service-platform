@@ -36,7 +36,7 @@ public class RequiredRoleOrRequestedUserHandler
 
         var requestedId = ctx.Request.RouteValues.GetValueOrDefault(KeycloakConstants.Id);
 
-        if (requestedId is not string id || !Ulid.TryParse(id, out var parsedId))
+        if (requestedId is not string id || !Guid.TryParse(id, out var parsedId))
         {
             return false;
         }
@@ -44,7 +44,7 @@ public class RequiredRoleOrRequestedUserHandler
         var identity = (ClaimsIdentity?)context.User.Identity;
         var currentUserIdClaim = identity?.FindFirst(KeycloakConstants.Claims.UserId);
 
-        if (currentUserIdClaim is null || !Ulid.TryParse(currentUserIdClaim.Value, out var currentUserId))
+        if (currentUserIdClaim is null || !Guid.TryParse(currentUserIdClaim.Value, out var currentUserId))
         {
             return false;
         }
