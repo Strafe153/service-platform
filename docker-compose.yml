@@ -1,4 +1,23 @@
 services:
+  users:
+    build:
+      context: ./users
+      dockerfile: ./Dockerfile
+    container_name: users
+    ports:
+      - 5062:5062
+    depends_on:
+      - sql_server
+      - rabbit_mq
+      - keycloak
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5062
+      - ConnectionStrings__Database=Server=sql_server,1433;Database=users;User Id=sa;Password=pa5sw0rd!;TrustServerCertificate=true;
+      - RabbitMq__Host=rabbit_mq
+      - Keycloak__auth-server-url=http://keycloak:8080/
+      - KeycloakAdmin__auth-server-url=http://keycloak:8080/
+
   sql_server:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: users_db
@@ -23,9 +42,11 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
+    container_name: keycloak
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASS}
+      - KC_HOSTNAME=keycloak # comment out for local development
     command: start-dev
     ports:
       - 8080:8080

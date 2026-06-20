@@ -17,7 +17,7 @@ public static class UserEndpoints
 {
     public static void RegisterUserEndpoints(this WebApplication app)
     {
-        const string idSpecifier = "{id:length(26)}";
+        const string idSpecifier = "{id:guid}";
 
         var group = app.MapGroup("users");
 
