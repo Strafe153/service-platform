@@ -16,7 +16,7 @@ public static class MassTransitConfiguration
             {
                 var options = configuration.GetSection(ConfigConstants.RabbitMq).Get<RabbitMqOptions>()!;
 
-                cfg.Host(options.Host, c =>
+                cfg.Host(options.Host, options.Port, "/", c =>
                 {
                    c.Username(options.Username);
                    c.Password(options.Password); 

@@ -1,0 +1,264 @@
+{
+  "realm": "users",
+  "id": "users",
+  "enabled": true,
+  "loginWithEmailAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "default-roles-users",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "offline_access",
+            "uma_authorization"
+          ]
+        }
+      },
+      {
+        "name": "offline_access",
+        "composite": false
+      },
+      {
+        "name": "uma_authorization",
+        "composite": false
+      }
+    ],
+    "client": {
+      "user": [
+        {
+          "name": "admin",
+          "clientRole": true,
+          "composite": false
+        }
+      ]
+    }
+  },
+  "clients": [
+    {
+      "id": "2673901c-2714-4462-8362-b458106688f7",
+      "clientId": "user",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "vGFERwcZYrCJdnWebH9JB9EaSr8AQf8C",
+      "redirectUris": [
+        "/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "fullScopeAllowed": true,
+      "protocolMappers": [
+        {
+          "name": "Audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "user",
+            "id.token.claim": "false",
+            "lightweight.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "id": "f70ea5ba-de0f-4fa7-ac26-e1ace397a145",
+          "name": "User Id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "user.attribute": "user_id",
+            "id.token.claim": "true",
+            "lightweight.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "user_id",
+            "jsonType.label": "String"
+          }
+        }
+      ],
+      "authorizationSettings": {
+        "allowRemoteResourceManagement": true,
+        "policyEnforcementMode": "ENFORCING",
+        "resources": [
+          {
+            "name": "Default Resource",
+            "type": "urn:user:resources:default",
+            "ownerManagedAccess": false,
+            "uris": [
+              "/*"
+            ]
+          }
+        ],
+        "policies": [
+          {
+            "name": "Default Policy",
+            "description": "A policy that grants access only for users within this realm",
+            "type": "regex",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "pattern": ".*",
+              "targetClaim": "sub"
+            }
+          },
+          {
+            "name": "Default Permission",
+            "description": "A permission that applies to the default resource type",
+            "type": "resource",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "defaultResourceType": "urn:user:resources:default",
+              "applyPolicies": "[\"Default Policy\"]"
+            }
+          }
+        ],
+        "scopes": [],
+        "decisionStrategy": "UNANIMOUS"
+      }
+    },
+    {
+      "clientId": "admin-api",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "R1SzmswuIeEX5sKFvcvbnUUzQUlAKIdX",
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect"
+    }
+  ],
+  "users": [
+    {
+      "id": "f998a5c2-9173-4587-8724-c609750fe8b9",
+      "username": "admin",
+      "email": "admin@mail.com",
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "Admin",
+      "attributes": {
+        "user_id": [ "01b940e9-4cb8-4035-97d8-59ceb16a4338" ]
+      },
+      "realmRoles": [
+        "default-roles-users"
+      ],
+      "clientRoles": {
+        "user": [
+          "admin"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "adminsecret",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "b3cb8ebf-9c74-416a-a888-b128cdb218e5",
+      "username": "test",
+      "email": "test@mail.com",
+      "enabled": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "attributes": {
+        "user_id": [ "7e5054cb-1609-4979-a40d-c0db5cffa938" ]
+      },
+      "realmRoles": [
+        "default-roles-users"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test5678",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "20fb8609-cc35-406e-ada6-92f3cef5abec",
+      "username": "joker",
+      "email": "joker@mail.com",
+      "enabled": true,
+      "firstName": "Ren",
+      "lastName": "Amamiya",
+      "attributes": {
+        "user_id": [ "d2399895-cdfb-4329-a487-9d94ab31fbe2" ]
+      },
+      "realmRoles": [
+        "default-roles-users"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "phantoms12",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "5d749445-df56-4ec1-b70a-2c332fc5b31d",
+      "username": "crow",
+      "email": "crow@pubsec.com",
+      "enabled": true,
+      "firstName": "Goro",
+      "lastName": "Akechi",
+      "attributes": {
+        "user_id": [ "2e26ecc2-3476-49e1-bab5-4f97d031a2c3" ]
+      },
+      "realmRoles": [
+        "default-roles-users"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ju5t1c3",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "2e34290a-4c44-4f8c-add4-7839f36559ee",
+      "username": "fox",
+      "email": "fox@phantoms.com",
+      "enabled": true,
+      "firstName": "Yusuke",
+      "lastName": "Kitagawa",
+      "attributes": {
+        "user_id": [ "df07d570-eb42-457e-89fd-51781ab7db94" ]
+      },
+      "realmRoles": [
+        "default-roles-users"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "H34art1)*s",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "service-account-admin-api",
+      "enabled": true,
+      "serviceAccountClientId": "admin-api",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users"
+        ]
+      }
+    }
+  ]
+}

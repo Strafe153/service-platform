@@ -4,7 +4,7 @@ using Users.Domain.Aggregates.User;
 namespace Users.Api.Application.Commands.UpdateAddress;
 
 public class UpdateAddressCommandHandler
-    : IRequestHandler<IdentifiedCommand<Guid, UpdateAddressCommand>>
+    : IRequestHandler<IdentifiedCommand<Guid, UpdateAddressCommand, Unit>, Unit>
 {
     private readonly IUsersRepository _usersRepository;
 
@@ -13,8 +13,8 @@ public class UpdateAddressCommandHandler
         _usersRepository = usersRepository;
     }
 
-    public async Task Handle(
-        IdentifiedCommand<Guid, UpdateAddressCommand> request,
+    public async Task<Unit> Handle(
+        IdentifiedCommand<Guid, UpdateAddressCommand, Unit> request,
         CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetByIdAsync(request.Id, cancellationToken)
@@ -29,5 +29,7 @@ public class UpdateAddressCommandHandler
 
         _usersRepository.Update(user);
         await _usersRepository.SaveChangesAsync(cancellationToken);
+
+        return Unit.Value;
     }
 }

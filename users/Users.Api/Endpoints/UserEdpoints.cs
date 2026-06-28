@@ -73,7 +73,7 @@ public static class UserEndpoints
         [FromBody] UpdateUserCommand command,
         CancellationToken cancellationToken)
     {
-        IdentifiedCommand<Guid, UpdateUserCommand> identifiedCommand = new(id, command);
+        IdentifiedCommand<Guid, UpdateUserCommand, Unit> identifiedCommand = new(id, command);
         await sender.Send(identifiedCommand, cancellationToken);
 
         return TypedResults.NoContent();
@@ -85,7 +85,7 @@ public static class UserEndpoints
         [FromBody] UpdateAddressCommand command,
         CancellationToken cancellationToken)
     {
-        IdentifiedCommand<Guid, UpdateAddressCommand> identifiedCommand = new(id, command);
+        IdentifiedCommand<Guid, UpdateAddressCommand, Unit> identifiedCommand = new(id, command);
         await sender.Send(identifiedCommand, cancellationToken);
 
         return TypedResults.NoContent();
