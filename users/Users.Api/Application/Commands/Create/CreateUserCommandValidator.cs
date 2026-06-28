@@ -3,7 +3,7 @@ using Users.Api.Application.Validation;
 
 namespace Users.Api.Application.Commands.Create;
 
-public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
     public CreateUserCommandValidator()
     {
@@ -40,7 +40,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
 
         RuleFor(c => c.Address.Country)
             .NotEmpty()
-            .MinimumLength(4)
+            .MinimumLength(2)
             .MaximumLength(60)
             .When(c => c.Address is not null);
 

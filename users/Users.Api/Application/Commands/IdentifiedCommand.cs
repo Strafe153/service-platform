@@ -2,8 +2,9 @@ using MediatR;
 
 namespace Users.Api.Application.Commands;
 
-public sealed record IdentifiedCommand<TId, TCommand> : IRequest
+public sealed record IdentifiedCommand<TId, TCommand, TResponse> : IRequest<TResponse>
     where TId : notnull, new()
+    where TCommand : class
 {
     public TId Id { get; private set; }
 

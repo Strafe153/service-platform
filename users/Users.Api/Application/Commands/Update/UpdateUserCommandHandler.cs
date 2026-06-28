@@ -4,7 +4,8 @@ using Users.Domain.Aggregates.User;
 
 namespace Users.Api.Application.Commands.Create;
 
-public class UpdateUserCommandHandler : IRequestHandler<IdentifiedCommand<Guid, UpdateUserCommand>>
+public class UpdateUserCommandHandler
+    : IRequestHandler<IdentifiedCommand<Guid, UpdateUserCommand, Unit>, Unit>
 {
     private readonly IUsersRepository _usersRepository;
 
@@ -13,8 +14,8 @@ public class UpdateUserCommandHandler : IRequestHandler<IdentifiedCommand<Guid, 
         _usersRepository = usersRepository;
     }
 
-    public async Task Handle(
-        IdentifiedCommand<Guid, UpdateUserCommand> request,
+    public async Task<Unit> Handle(
+        IdentifiedCommand<Guid, UpdateUserCommand, Unit> request,
         CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetByIdAsync(request.Id, cancellationToken)
@@ -28,5 +29,7 @@ public class UpdateUserCommandHandler : IRequestHandler<IdentifiedCommand<Guid, 
 
         _usersRepository.Update(user);
         await _usersRepository.SaveChangesAsync(cancellationToken);
+
+        return Unit.Value;
     }
 }

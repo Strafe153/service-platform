@@ -42,3 +42,5 @@ app.RegisterUserEndpoints();
 await app.RunDatabaseMigrations();
 
 app.Run();
+
+public partial class Program {}
