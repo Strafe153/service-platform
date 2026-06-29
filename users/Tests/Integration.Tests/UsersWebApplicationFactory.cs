@@ -32,7 +32,6 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
     private readonly KeycloakContainer _keycloakContainer = new KeycloakBuilder("quay.io/keycloak/keycloak:26.4")
         .WithEnvironment("KEYCLOAK_ADMIN", "admin")
         .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", "qwerty")
-        .WithCommand()
         .WithBindMount(RealmFilePath, "/opt/keycloak/data/import/users_realm.json")
         .WithCommand("--import-realm")
         .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(request =>
