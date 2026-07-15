@@ -7,34 +7,40 @@ namespace Users.Api.Mapping;
 
 public static class UserExtensions
 {
-    public static UserReadDto ToReadDto(this User user)
+    extension(User user)
     {
-        AddressReadDto address = new(
-            user.Address.Country,
-            user.Address.State,
-            user.Address.City,
-            user.Address.ZipCode,
-            user.Address.Street
-        );
+        public UserReadDto ToReadDto()
+        {
+            AddressReadDto address = new(
+                user.Address.Country,
+                user.Address.State,
+                user.Address.City,
+                user.Address.ZipCode,
+                user.Address.Street
+            );
 
-        UserReadDto dto = new(
-            user.Id,
-            user.Email,
-            user.FirstName,
-            user.LastName,
-            user.PhoneNumber,
-            user.BirthDate,
-            address);
+            UserReadDto dto = new(
+                user.Id,
+                user.Email,
+                user.FirstName,
+                user.LastName,
+                user.PhoneNumber,
+                user.BirthDate,
+                address);
 
-        return dto;
+            return dto;
+        }
     }
 
-    public static UserRepresentation ToKeycloakUser(this CreateUserCommand command) =>
-        new()
-        {
-            Email = command.Email,
-            Username = command.Email,
-            FirstName = command.FirstName,
-            LastName = command.LastName
-        };
+    extension(CreateUserCommand command)
+    {
+        public UserRepresentation ToKeycloakUser() =>
+            new()
+            {
+                Email = command.Email,
+                Username = command.Email,
+                FirstName = command.FirstName,
+                LastName = command.LastName
+            };
+    }
 }
