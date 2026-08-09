@@ -10,24 +10,24 @@ public static class UsersTelemetry
 
     public static Meter Meter { get; } = new(OpenTelemetryOptions.ServiceName);
 
-    public static Counter<long> UsersCreated { get; } = Meter.CreateCounter<long>("users.created");
+    public static Counter<int> UsersCreated { get; } = Meter.CreateCounter<int>("users.created");
 
-    public static Counter<long> UserCreationFailures { get; } =
-        Meter.CreateCounter<long>("users.creation.failures");
+    public static Counter<int> UserCreationFailures { get; } =
+        Meter.CreateCounter<int>("users.creation.failures");
 
-    public static Counter<long> UsersUpdated { get; } = Meter.CreateCounter<long>("users.updated");
+    public static Counter<int> UsersUpdated { get; } = Meter.CreateCounter<int>("users.updated");
 
-    public static Counter<long> UserUpdateFailures { get; } =
-        Meter.CreateCounter<long>("users.update.failures");
+    public static Counter<int> UserUpdateFailures { get; } =
+        Meter.CreateCounter<int>("users.update.failures");
 
-    public static Counter<long> UsersDeleted { get; } = Meter.CreateCounter<long>("users.deleted");
+    public static Counter<int> UsersDeleted { get; } = Meter.CreateCounter<int>("users.deleted");
 
-    public static Counter<long> UserDeletionFailures { get; } =
-        Meter.CreateCounter<long>("users.deletion.failures");
+    public static Counter<int> UserDeletionFailures { get; } =
+        Meter.CreateCounter<int>("users.deletion.failures");
 
-    public static Counter<long> UserAddressUpdated { get; } =
-        Meter.CreateCounter<long>("users.address.updated");
+    public static Counter<int> UserAddressUpdated { get; } =
+        Meter.CreateCounter<int>("users.address.updated");
 
-    public static Counter<long> UserAddressUpdateFailures { get; } =
-        Meter.CreateCounter<long>("users.address.update.failures");
+    public static Counter<int> UserAddressUpdateFailures { get; } =
+        Meter.CreateCounter<int>("users.address.update.failures");
 }
