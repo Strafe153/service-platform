@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Sdk.Admin;
 using Keycloak.AuthServices.Sdk.Admin.Models;
@@ -10,34 +11,25 @@ using Users.Api.Application.Queries.Dto;
 using Users.Api.Configurations.Messaging;
 using Users.Api.Keycloak;
 using Users.Api.Mapping;
+using Users.Api.Telemetry;
 using Users.Domain.Aggregates.User;
 using Users.Domain.Events;
 
 namespace Users.Api.Application.Commands.Create;
 
-public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserReadDto>
+public sealed class CreateUserCommandHandler(
+    IUsersRepository usersRepository,
+    IPublishEndpoint publishEndpoint,
+    IKeycloakClient keycloakClient,
+    IOptions<KeycloakAuthenticationOptions> keycloakOptions,
+    ILogger<CreateUserCommandHandler> logger) : IRequestHandler<CreateUserCommand, UserReadDto>
 {
-    private readonly IUsersRepository _usersRepository;
-    private readonly IKeycloakClient _keycloakClient;
-    private readonly IPublishEndpoint _publishEndpoint;
-    private readonly KeycloakAuthenticationOptions _keycloakOptions;
-
-    public CreateUserCommandHandler(
-        IUsersRepository usersRepository,
-        IPublishEndpoint publishEndpoint,
-        IKeycloakClient keycloakClient,
-        IOptions<KeycloakAuthenticationOptions> keycloakOptions)
-    {
-        _usersRepository = usersRepository;
-        _publishEndpoint = publishEndpoint;
-        _keycloakClient = keycloakClient;
-        _keycloakOptions = keycloakOptions.Value;
-    }
-
     public async Task<UserReadDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        using var activity = UsersTelemetry.ActivitySource.StartActivity("users.create");
+
         var userId = string.Empty;
-        
+
         try
         {
             var keycloakUser = await CreateUserAsync(request, cancellationToken);
@@ -51,11 +43,32 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
 
             await Task.WhenAll(updateTask, eventTask);
 
+            logger.LogInformation("Successfully created a user");
+            UsersTelemetry.UsersCreated.Add(1);
+
+            activity?
+                .SetTag("user.keycloak_id", userId)
+                .SetTag("user.id", dbUser.Id)
+                .SetStatus(ActivityStatusCode.Ok);
+
             return dbUser.ToReadDto();
         }
         catch (DbUpdateException)
         {
-            await _keycloakClient.DeleteUserAsync(_keycloakOptions.Realm, userId, cancellationToken);
+            logger.LogError("Failed to create a user due to a database failure");
+            UsersTelemetry.UserCreationFailures.IncrementError();
+            activity?.SetStatus(ActivityStatusCode.Error, "Database update failed");
+
+            await keycloakClient.DeleteUserAsync(keycloakOptions.Value.Realm, userId, cancellationToken);
+
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to create a user due to the exception: {Exception}", ex.Message);
+            UsersTelemetry.UserCreationFailures.IncrementError();
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+
             throw;
         }
     }
@@ -67,8 +80,8 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
         var keycloakUser = request.ToKeycloakUser();
         keycloakUser.Enabled = true;
 
-        var userResponse = await _keycloakClient.CreateUserWithResponseAsync(
-            _keycloakOptions.Realm,
+        var userResponse = await keycloakClient.CreateUserWithResponseAsync(
+            keycloakOptions.Value.Realm,
             keycloakUser,
             cancellationToken);
 
@@ -93,9 +106,9 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
         {
             Value = command.Password
         };
-        
-        var response = await _keycloakClient.ResetPasswordWithResponseAsync(
-            _keycloakOptions.Realm,
+
+        var response = await keycloakClient.ResetPasswordWithResponseAsync(
+            keycloakOptions.Value.Realm,
             userId,
             credentials,
             cancellationToken);
@@ -117,8 +130,8 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
             userId,
             command.Address);
 
-        _usersRepository.Add(user);
-        await _usersRepository.SaveChangesAsync(cancellationToken);
+        usersRepository.Add(user);
+        await usersRepository.SaveChangesAsync(cancellationToken);
 
         return user;
     }
@@ -133,8 +146,8 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
             { "user_id", [dbUserId.ToString()] }
         };
 
-        var updateTask = _keycloakClient.UpdateUserWithResponseAsync(
-            _keycloakOptions.Realm,
+        var updateTask = keycloakClient.UpdateUserWithResponseAsync(
+            keycloakOptions.Value.Realm,
             keycloakUser.Id!,
             keycloakUser,
             cancellationToken);
@@ -146,7 +159,7 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
     {
         UserCreatedEvent userCreatedEvent = new(command.Email, DateTime.UtcNow);
 
-        var eventTask = _publishEndpoint.Publish(
+        var eventTask = publishEndpoint.Publish(
             userCreatedEvent,
             c =>
             {

@@ -1,35 +1,65 @@
+using System.Diagnostics;
 using MediatR;
-using Users.Api.Application.Commands.Update;
+using Microsoft.EntityFrameworkCore;
+using Users.Api.Telemetry;
 using Users.Domain.Aggregates.User;
 
-namespace Users.Api.Application.Commands.Create;
+namespace Users.Api.Application.Commands.Update;
 
-public class UpdateUserCommandHandler
-    : IRequestHandler<IdentifiedCommand<Guid, UpdateUserCommand, Unit>, Unit>
+public class UpdateUserCommandHandler(
+    IUsersRepository usersRepository,
+    ILogger<UpdateUserCommandHandler> logger)
+        : IRequestHandler<IdentifiedCommand<Guid, UpdateUserCommand, Unit>, Unit>
 {
-    private readonly IUsersRepository _usersRepository;
-
-    public UpdateUserCommandHandler(IUsersRepository usersRepository)
-    {
-        _usersRepository = usersRepository;
-    }
-
     public async Task<Unit> Handle(
         IdentifiedCommand<Guid, UpdateUserCommand, Unit> request,
         CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdAsync(request.Id, cancellationToken)
-            ?? throw new NullReferenceException($"User with id {request.Id} not found.");
+        using var activity = UsersTelemetry.ActivitySource.StartActivity("users.update");
 
-        user.Update(
-            request.Command.FirstName,
-            request.Command.LastName,
-            request.Command.PhoneNumber,
-            request.Command.BirthDate);
+        try
+        {
+            var user = await usersRepository.GetByIdAsync(request.Id, cancellationToken)
+                ?? throw new NullReferenceException($"User with id {request.Id} not found.");
 
-        _usersRepository.Update(user);
-        await _usersRepository.SaveChangesAsync(cancellationToken);
+            user.Update(
+                request.Command.FirstName,
+                request.Command.LastName,
+                request.Command.PhoneNumber,
+                request.Command.BirthDate);
 
-        return Unit.Value;
+            usersRepository.Update(user);
+            await usersRepository.SaveChangesAsync(cancellationToken);
+
+            logger.LogInformation("Successfully updated the user with Id={Id}", user.Id);
+            UsersTelemetry.UsersUpdated.Add(1);
+
+            activity?
+                .SetTag("user.id", user.Id)
+                .SetTag("user.keycloak_id", user.AuthProviderId)
+                .SetStatus(ActivityStatusCode.Ok);
+
+            return Unit.Value;
+        }
+        catch (DbUpdateException)
+        {
+            logger.LogError("Failed to update the user with Id={Id} due to a database failure", request.Id);
+            UsersTelemetry.UserUpdateFailures.IncrementError();
+            activity?.SetStatus(ActivityStatusCode.Error, "Database update failed");
+
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                "Failed to update the user with Id={Id} due to the exception: {Exception}",
+                request.Id,
+                ex.Message);
+
+            UsersTelemetry.UserUpdateFailures.IncrementError();
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+
+            throw;
+        }
     }
 }
