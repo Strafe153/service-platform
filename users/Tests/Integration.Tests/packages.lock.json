@@ -997,28 +997,12 @@
           "OpenTelemetry.Api": "1.17.0"
         }
       },
-      "OpenTelemetry.Exporter.Console": {
-        "type": "Transitive",
-        "resolved": "1.17.0",
-        "contentHash": "sSoCa2DMCkw7tQabiVduwKWVyg9ungCiwh+0JuDPODF6CuYvR+OCuJwqcbzJsTMecWQrbgL8OYWAt3GC5tJGhw==",
-        "dependencies": {
-          "OpenTelemetry": "1.17.0"
-        }
-      },
       "OpenTelemetry.Exporter.OpenTelemetryProtocol": {
         "type": "Transitive",
         "resolved": "1.17.0",
         "contentHash": "R1omQOrQpGlS0Cp5UIr/TAiuEA48JrPlgr1NPV5gESiTU7HhWU+ILe2EBSYb1fKdsSavZ7nZkHcUxAzofPqr2A==",
         "dependencies": {
           "OpenTelemetry": "1.17.0"
-        }
-      },
-      "OpenTelemetry.Exporter.Prometheus.AspNetCore": {
-        "type": "Transitive",
-        "resolved": "1.17.0-beta.1",
-        "contentHash": "eecXu43HkY7LFJDutrQ6kpwvUOMDeqLMtU+UeN225ckXw33qN/StTcdW6mTHH1jDSYdFM29vvDXB3jnFwPHkXg==",
-        "dependencies": {
-          "OpenTelemetry": "[1.17.0, 2.0.0)"
         }
       },
       "OpenTelemetry.Extensions.Hosting": {
@@ -1295,12 +1279,10 @@
           "MassTransit.RabbitMQ": "[8.5.5, 8.5.5]",
           "MediatR": "[12.5.0, 12.5.0]",
           "Microsoft.AspNetCore.OpenApi": "[8.0.21, 8.0.21]",
-          "OpenTelemetry.Exporter.Console": "[1.17.0, )",
-          "OpenTelemetry.Exporter.OpenTelemetryProtocol": "[1.17.0, )",
-          "OpenTelemetry.Exporter.Prometheus.AspNetCore": "[1.17.0-beta.1, )",
-          "OpenTelemetry.Extensions.Hosting": "[1.17.0, )",
-          "OpenTelemetry.Instrumentation.AspNetCore": "[1.17.0, )",
-          "OpenTelemetry.Instrumentation.Http": "[1.17.0, )",
+          "OpenTelemetry.Exporter.OpenTelemetryProtocol": "[1.17.0, 1.17.0]",
+          "OpenTelemetry.Extensions.Hosting": "[1.17.0, 1.17.0]",
+          "OpenTelemetry.Instrumentation.AspNetCore": "[1.17.0, 1.17.0]",
+          "OpenTelemetry.Instrumentation.Http": "[1.17.0, 1.17.0]",
           "Swashbuckle.AspNetCore": "[6.6.2, 6.6.2]",
           "Users.Infrastructure": "[1.0.0, )"
         }
