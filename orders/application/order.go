@@ -12,7 +12,7 @@ import (
 )
 
 type CreateOrderRequest struct {
-	UserId   string                `json:"userId" validate:"required,alphanum,min=26,max=26"`
+	UserId   string                `json:"userId" validate:"required,uuid"`
 	Products []domain.OrderProduct `json:"products" validate:"required,min=1,max=999,dive"`
 }
 
