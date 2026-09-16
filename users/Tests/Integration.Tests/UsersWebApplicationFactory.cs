@@ -24,15 +24,16 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
     private readonly MsSqlContainer _msSqlContainer =
         new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest").Build();
 
-    private readonly RabbitMqContainer _rabbitMqcontainer = new RabbitMqBuilder("rabbitmq:4.2.0-management")
-        .WithUsername(RabbitMqUser)
-        .WithPassword(RabbitMqPassword)
-        .Build();
+    private readonly RabbitMqContainer _rabbitMqcontainer = new RabbitMqBuilder(
+        "docker.io/library/rabbitmq:4.2.0-management")
+            .WithUsername(RabbitMqUser)
+            .WithPassword(RabbitMqPassword)
+            .Build();
 
     private readonly KeycloakContainer _keycloakContainer = new KeycloakBuilder("quay.io/keycloak/keycloak:26.4")
         .WithEnvironment("KEYCLOAK_ADMIN", "admin")
         .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", "qwerty")
-        .WithBindMount(RealmFilePath, "/opt/keycloak/data/import/users_realm.json")
+        .WithResourceMapping(RealmFilePath, "/opt/keycloak/data/import")
         .WithCommand("--import-realm")
         .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(request =>
             request
@@ -65,7 +66,7 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
                 "..",
                 "..",
                 "..",
-                "users_realm.json");
+                "users-realm.json");
 
             return filePath;
         }
@@ -115,6 +116,7 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
                 ["KeycloakAdmin:auth-server-url"] = keycloakAddress,
                 ["KeycloakAdmin:realm"] = "users",
                 ["KeycloakAdmin:credentials:secret"] = "R1SzmswuIeEX5sKFvcvbnUUzQUlAKIdX",
+                ["KeycloakAdmin:resource"] = "admin-api",
 
                 ["RabbitMq:Port"] = rabbitMqPort,
                 ["RabbitMq:Username"] = RabbitMqUser,
