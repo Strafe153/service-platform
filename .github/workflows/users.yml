@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - 'users/**'
+  workflow_dispatch:
 
 env:
   API_PATH: ./Users.Api/Users.Api.csproj
@@ -27,7 +28,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-          
+
       - name: Restore API dependencies
         run: dotnet restore $API_PATH --locked-mode
       - name: Build API
