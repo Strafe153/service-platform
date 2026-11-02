@@ -1,0 +1,34 @@
+name: users
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - './users/**' 
+  pull_request:
+    branches:
+      - main
+    paths:
+      - './users/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./users
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          # cache: true
+          # cache-dependency-path: '**/packages.lock.json'
+      - name: Restore dependencies
+        run: dotnet restore ./Users.Api/Users.Api.csproj
+      - name: Build
+        run: dotnet build ./Users.Api/Users.Api.csproj --no-restore
+      # - name: Test
+      #   run: dotnet test --no-bulid --verbosity normal
