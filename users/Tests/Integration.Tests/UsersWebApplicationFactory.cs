@@ -33,7 +33,7 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
     private readonly KeycloakContainer _keycloakContainer = new KeycloakBuilder("quay.io/keycloak/keycloak:26.4")
         .WithEnvironment("KEYCLOAK_ADMIN", "admin")
         .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", "qwerty")
-        .WithResourceMapping(RealmFilePath, "/opt/keycloak/data/import")
+        .WithResourceMapping(GetRootFilePath("users-realm.json"), "/opt/keycloak/data/import")
         .WithCommand("--import-realm")
         .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(request =>
             request
@@ -54,21 +54,6 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
         {
             var port = _keycloakContainer.GetMappedPublicPort(InternalKeycloakPort);
             return $"http://localhost:{port}/realms/users/protocol/openid-connect/token";
-        }
-    }
-
-    private static string RealmFilePath
-    {
-        get
-        {
-            var filePath = Path.Combine(
-                AppContext.BaseDirectory,
-                "..",
-                "..",
-                "..",
-                "users-realm.json");
-
-            return filePath;
         }
     }
 
@@ -103,24 +88,19 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
 
         builder.ConfigureAppConfiguration((ctx, b) =>
         {
+            var rabbitMqPort = _rabbitMqcontainer.GetMappedPublicPort().ToString();
+
             var keycloakPort = _keycloakContainer.GetMappedPublicPort(InternalKeycloakPort);
             var keycloakAddress = $"http://localhost:{keycloakPort}/";
 
-            var rabbitMqPort = _rabbitMqcontainer.GetMappedPublicPort().ToString();
+            var appsettingsConfigs = GetRootFilePath("appsettings.json");
+            b.AddJsonFile(appsettingsConfigs);
 
             Dictionary<string, string?> configs = new()
             {
-                ["Keycloak:auth-server-url"] = keycloakAddress,
-                ["Keycloak:credentials:secret"] = "vGFERwcZYrCJdnWebH9JB9EaSr8AQf8C",
-
-                ["KeycloakAdmin:auth-server-url"] = keycloakAddress,
-                ["KeycloakAdmin:realm"] = "users",
-                ["KeycloakAdmin:credentials:secret"] = "R1SzmswuIeEX5sKFvcvbnUUzQUlAKIdX",
-                ["KeycloakAdmin:resource"] = "admin-api",
-
                 ["RabbitMq:Port"] = rabbitMqPort,
-                ["RabbitMq:Username"] = RabbitMqUser,
-                ["RabbitMq:Password"] = RabbitMqPassword
+                ["Keycloak:auth-server-url"] = keycloakAddress,
+                ["KeycloakAdmin:auth-server-url"] = keycloakAddress,
             };
 
             b.AddInMemoryCollection(configs);
@@ -245,4 +225,12 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
         await transaction.CommitAsync();
         await context.SaveChangesAsync();
     }
+
+    private static string GetRootFilePath(string fileName) =>
+        Path.Combine(
+            AppContext.BaseDirectory,
+            "..",
+            "..",
+            "..",
+            fileName);
 }
