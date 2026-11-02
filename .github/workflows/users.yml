@@ -36,4 +36,4 @@ jobs:
       - name: Restore integration tests dependencies
         run: dotnet restore $INTEGRATION_TESTS_PATH --locked-mode
       - name: Run integration tests
-        run: dotnet test $INTEGRATION_TESTS_PATH --c Release
+        run: dotnet test $INTEGRATION_TESTS_PATH -c Release
