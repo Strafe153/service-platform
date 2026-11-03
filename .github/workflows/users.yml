@@ -14,7 +14,6 @@ on:
   workflow_dispatch:
 
 env:
-  ROOT_FOLDER: ./users
   API_PATH: ./Users.Api/Users.Api.csproj
   INTEGRATION_TESTS_PATH: ./Tests/Integration.Tests/Integration.Tests.csproj
 
@@ -23,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: $ROOT_FOLDER
+        working-directory: ./users
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
@@ -58,5 +57,5 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           push: true
-          context: $ROOT_FOLDER
+          context: ./users
           tags: ghcr.io/${{ github.repository }}/users:latest
