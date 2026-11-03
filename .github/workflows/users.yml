@@ -14,6 +14,7 @@ on:
   workflow_dispatch:
 
 env:
+  ROOT_FOLDER: ./users
   API_PATH: ./Users.Api/Users.Api.csproj
   INTEGRATION_TESTS_PATH: ./Tests/Integration.Tests/Integration.Tests.csproj
 
@@ -22,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./users
+        working-directory: $ROOT_FOLDER
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
@@ -38,3 +39,24 @@ jobs:
         run: dotnet restore $INTEGRATION_TESTS_PATH --locked-mode
       - name: Run integration tests
         run: dotnet test $INTEGRATION_TESTS_PATH -c Release
+    
+  publish_users:
+    runs-on: ubuntu-latest
+    needs: build_users
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v4
+      - name: Build image and push to GHCR
+        uses: docker/build-push-action@v7
+        with:
+          push: true
+          context: $ROOT_FOLDER
+          tags: ghcr.io/${{ github.repository }}/users:latest
