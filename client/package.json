@@ -14,8 +14,10 @@
     "@emotion/styled": "11.14.1",
     "@mui/material": "9.5.0",
     "@tanstack/react-query": "5.105.0",
+    "keycloak-js": "26.2.4",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-router": "8.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
