@@ -8,13 +8,15 @@ const keycloak = new Keycloak({
 
 export async function initKeycloak(): Promise<void> {
   await keycloak.init({
-    onLoad: 'login-required',
+    onLoad: "check-sso",
+    silentCheckSsoRedirectUri: `${location.origin}/silent-check-sso.html`,
+    silentCheckSsoFallback: false,
   });
 }
 
 export async function login(): Promise<void> {
   await keycloak.login({
-    redirectUri: import.meta.env.BASE_URL,
+    redirectUri: import.meta.env.VITE_BASE_URL,
   });
 }
 
@@ -23,7 +25,16 @@ export async function logOut(): Promise<void> {
 }
 
 export async function getToken(): Promise<string | undefined> {
-  await keycloak.updateToken(import.meta.env.VITE_KEYCLOAK_MIN_TOKEN_VALIDITY);
+  try {
+    const isRefreshed = await keycloak.updateToken(import.meta.env.VITE_KEYCLOAK_MIN_TOKEN_VALIDITY);
+
+    if (!isRefreshed) {
+      console.error("The token was not refreshed");
+    }
+  } catch {
+    console.error("Failed to refresh the token");
+  }
+
   return keycloak.token;
 }
 

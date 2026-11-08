@@ -1,0 +1,73 @@
+{
+  "header": {
+    "servicePlatform": "Service platform",
+    "signUp": "Sign Up",
+    "logIn": "Log In",
+    "logOut": "Log Out"
+  },
+  "footer": {
+    "copyrightName": "Vitalii Knysh"
+  },
+  "home": "Home",
+  "registration": {
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phoneNumber": "Phone Number",
+      "birthDate": "Birth Date",
+      "password": "Password",
+      "country": "Country",
+      "state": "State",
+      "city": "City",
+      "zipCode": "Zip Code",
+      "street": "Street",
+      "signUp": "Sign Up",
+      "errors": {
+        "email": {
+          "format": "Incorrect email format",
+          "max": "Max allowed length is 50 characters"
+        },
+        "firstName": {
+          "required": "First Name is required",
+          "max": "Max allowed length is 25 characters"
+        },
+        "lastName": {
+          "required": "Last Name is required",
+          "max": "Max allowed length is 25 characters"
+        },
+        "phoneNumber": {
+          "format": "Incorrect phone number format",
+          "min": "Min allowed length is 10 characters",
+          "max": "Max allowed length is 15 characters"
+        },
+        "birthDate": {
+          "format": "Incorrect date format"
+        },
+        "password": {
+          "min": "Min allowed length is 8 characters",
+          "max": "Max allowed length is 64 characters"
+        },
+        "country": {
+          "min": "Min allowed length is 2 characters",
+          "max": "Max allowed length is 60 characters"
+        },
+        "state": {
+          "required": "State is required",
+          "max": "Max allowed length is 100 characters"
+        },
+        "city": {
+          "required": "City is required",
+          "max": "Max allowed length is 100 characters"
+        },
+        "zipCode": {
+          "required": "Zip code is required",
+          "max": "Max allowed length is 10 characters"
+        },
+        "street": {
+          "max": "Max allowed length is 100 characters"
+        }
+      }
+    }
+  }
+}
