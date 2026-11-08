@@ -65,6 +65,6 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(c => c.Address.Street)
             .MinimumLength(1)
             .MaximumLength(100)
-            .When(c => c.Address is not null);
+            .When(c => !string.IsNullOrEmpty(c.Address.Street));
     }
 }
