@@ -22,8 +22,12 @@ export default function Header({ openSidebar }: { openSidebar: ParameterlessActi
   const authButtons = isAuthenticated()
     ? <Button color="inherit" onClick={logOut}>{t("header.logOut")}</Button>
     : <>
-      <Button color="inherit">
-        <Link to="/sign-up">{t("header.signUp")}</Link>
+      <Button
+        color="inherit"
+        component={Link}
+        to="/sign-up"
+      >
+        {t("header.signUp")}
       </Button>
       <Button color="inherit" onClick={login}>{t("header.logIn")}</Button>
     </>;
@@ -54,13 +58,17 @@ export default function Header({ openSidebar }: { openSidebar: ParameterlessActi
               {menuButton}
               
               <Typography
+                component={Link}
+                to="/"
                 variant="h5"
                 sx={{
                   flexGrow: 1,
-                  paddingTop: 1
+                  paddingTop: 1,
+                  textDecoration: "none",
+                  color: "inherit",
                 }}
               >
-                <Link to="/">{t("header.servicePlatform")}</Link>
+                {t("header.servicePlatform")}
               </Typography>
             </Row>
 
