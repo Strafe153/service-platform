@@ -1,10 +1,11 @@
 import { IconButton, Snackbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import type { ParameterlessAction } from "../../types/common.types";
 
 type AlertProps = {
   open: boolean;
   message: string | undefined;
-  onClose: () => void;
+  onClose: ParameterlessAction;
 };
 
 export default function Alert({ open, message, onClose }: AlertProps) {

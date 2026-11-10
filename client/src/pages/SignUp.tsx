@@ -20,10 +20,7 @@ export default function SignUp() {
   const mutation = useMutation({
     mutationFn: registerUser,
     onSuccess: login,
-    onError: (e) => {
-      console.log(e);
-      setSnackbarError(e.message);
-    },
+    onError: (e) => setSnackbarError(e.message),
   });
 
   function update(name: string, updateFn: (prev: UserRegisterDto) => UserRegisterDto) {

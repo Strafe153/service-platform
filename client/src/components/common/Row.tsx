@@ -1,16 +1,10 @@
-import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import type { PropsWithChildren } from "react";
 
-export default function Row({ children, gap = 2 }: PropsWithChildren<{ gap?: number }>) {
+export default function Row({ children, spacing = 2 }: PropsWithChildren<{ spacing?: number }>) {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "row",
-        gap,
-      }}
-    >
+    <Stack direction="row" spacing={spacing}>
       {children}
-    </Box>
+    </Stack>
   );
 }
