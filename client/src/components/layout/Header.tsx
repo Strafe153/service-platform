@@ -13,6 +13,12 @@ export default function Header({ openSidebar }: { openSidebar: ParameterlessActi
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(getLanguage());
   
+  const menuButton = isAuthenticated() && (
+    <IconButton size="large" onClick={openSidebar}>
+      <MenuIcon />
+    </IconButton>
+  );
+
   const authButtons = isAuthenticated()
     ? <Button color="inherit" onClick={logOut}>{t("header.logOut")}</Button>
     : <>
@@ -45,9 +51,7 @@ export default function Header({ openSidebar }: { openSidebar: ParameterlessActi
             }}
           >
             <Row spacing={1}>
-              <IconButton size="large" onClick={openSidebar}>
-                <MenuIcon />
-              </IconButton>
+              {menuButton}
               
               <Typography
                 variant="h5"
