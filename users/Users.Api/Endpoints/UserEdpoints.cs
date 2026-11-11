@@ -42,7 +42,7 @@ public static class UserEndpoints
 
     public static async Task<Ok<PageDto<UserReadDto>>> Get(
         [FromServices] ISender sender,
-        [AsParameters] GetUsersRequest request,
+        [AsParameters] GetUsersQuery request,
         CancellationToken cancellationToken)
     {
         var users = await sender.Send(request, cancellationToken);

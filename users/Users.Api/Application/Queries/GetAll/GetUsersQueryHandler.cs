@@ -6,7 +6,7 @@ using Users.Domain.Aggregates.User;
 
 namespace Users.Api.Application.Queries.GetAll;
 
-public class GetUsersQueryHandler : IRequestHandler<GetUsersRequest, PageDto<UserReadDto>>
+public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PageDto<UserReadDto>>
 {
     private readonly IUsersRepository _usersRepository;
     
@@ -15,7 +15,7 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersRequest, PageDto<Use
         _usersRepository = usersRepository;
     }
 
-    public Task<PageDto<UserReadDto>> Handle(GetUsersRequest request, CancellationToken cancellationToken)
+    public Task<PageDto<UserReadDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
         var query = _usersRepository.Get();
 
