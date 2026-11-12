@@ -1,5 +1,10 @@
 import type { Guid } from "./common.types";
 
+export interface GetUsersDto {
+  pageNumber: number;
+  pageSize: number;
+}
+
 export interface UserRegisterDto {
   email: string;
   firstName: string;
@@ -17,7 +22,6 @@ export interface UserReadDto {
   lastName: string;
   phoneNumber: string;
   birthDate: Date;
-  password: string;
   address: AddressDto;
 }
 

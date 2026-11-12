@@ -8,6 +8,7 @@
   "footer": {
     "copyrightName": "Книш Віталій"
   },
+  "forbidden": "Доступ до сторінки заборонено",
   "home": "Головна",
   "registration": {
     "form": {
@@ -68,6 +69,25 @@
           "max": "Маскимально дозволена довжина 100 символів"
         }
       }
+    }
+  },
+  "sidebar": {
+    "users": "Користувачі"
+  },
+  "table": {
+    "rowsPerPage": "Рядків на сторінці"
+  },
+  "user": {
+    "table": {
+      "id": "ID",
+      "email": "Електронна адреса",
+      "firstName": "Ім'я",
+      "lastName": "Прізвище",
+      "phoneNumber": "Номер телефону",
+      "birthDate": "Дата народження"
+    },
+    "errors": {
+      "incorrectId": "Неправильний формат ID"
     }
   }
 }

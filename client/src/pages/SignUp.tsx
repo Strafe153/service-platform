@@ -84,7 +84,6 @@ export default function SignUp() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "calc(100vh - 18.5vh)",
-          my: 3,
         }}
       >
         <Box

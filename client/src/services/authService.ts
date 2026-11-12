@@ -1,5 +1,7 @@
 import Keycloak from "keycloak-js";
 
+const userResource = "user";
+
 const keycloak = new Keycloak({
   url: import.meta.env.VITE_KEYCLOAK_URL,
   realm: import.meta.env.VITE_KEYCLOAK_REALM,
@@ -14,30 +16,25 @@ export async function initKeycloak(): Promise<void> {
   });
 }
 
-export async function login(): Promise<void> {
-  await keycloak.login({
+export function login(): Promise<void> {
+  return keycloak.login({
     redirectUri: import.meta.env.VITE_BASE_URL,
   });
 }
 
-export async function logOut(): Promise<void> {
+export function logOut(): Promise<void> {
   return keycloak.logout();
 }
 
 export async function getToken(): Promise<string | undefined> {
-  try {
-    const isRefreshed = await keycloak.updateToken(import.meta.env.VITE_KEYCLOAK_MIN_TOKEN_VALIDITY);
-
-    if (!isRefreshed) {
-      console.error("The token was not refreshed");
-    }
-  } catch {
-    console.error("Failed to refresh the token");
-  }
-
+  await keycloak.updateToken(import.meta.env.VITE_KEYCLOAK_MIN_TOKEN_VALIDITY);
   return keycloak.token;
 }
 
 export function isAuthenticated(): boolean {
   return keycloak.authenticated;
+}
+
+export function isAdmin(): boolean {
+  return keycloak.hasResourceRole("admin", userResource);
 }

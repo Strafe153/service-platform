@@ -1,3 +1,5 @@
+import { getToken } from "../services/authService";
+
 type ErrorResponse = {
   errors: {
     error: string;
@@ -5,13 +7,23 @@ type ErrorResponse = {
   }[];
 };
 
-export async function fetchJson(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+export async function fetchJson<T>(
+  url: RequestInfo | URL,
+  init?: RequestInit,
+  useAuth: boolean = true,
+): Promise<T> {
+  const headers = new Headers(init?.headers);
+
+  headers.append("Content-Type", "application/json");
+
+  if (useAuth) {
+    const token = await getToken();
+    headers.append("Authorization", `Bearer ${token}`);
+  }
+
   const response = await fetch(url, {
     ...init,
-    headers: {
-      ...init?.headers,
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -22,4 +34,19 @@ export async function fetchJson(url: RequestInfo | URL, init?: RequestInit): Pro
   }
 
   return response.json();
+}
+
+export function populateQueryParameters<T extends object>(url: string, dto: T): URL {
+  // Chose to have tiny memory overhead of copying the passed URL
+  // over requiring callers to clone it when they use global baseUrl
+  const newUrl = new URL(url);
+
+  for (const [key, value] of Object.entries(dto)) {
+    // != is used deliberately to filter both null and undefined
+    if (value != null) {
+      newUrl.searchParams.append(key, String(value));
+    }
+  }
+
+  return newUrl;
 }

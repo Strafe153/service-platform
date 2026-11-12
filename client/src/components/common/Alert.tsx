@@ -14,7 +14,10 @@ export default function Alert({ open, message, onClose }: AlertProps) {
       open={open}
       message={message}
       autoHideDuration={3000}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{
+        vertical: "top",
+        horizontal: "right"
+      }}
       onClose={onClose}
       action={
         <IconButton

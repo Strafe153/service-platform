@@ -8,6 +8,7 @@
   "footer": {
     "copyrightName": "Vitalii Knysh"
   },
+  "forbidden": "Access to the page is forbidden",
   "home": "Home",
   "registration": {
     "form": {
@@ -68,6 +69,25 @@
           "max": "Max allowed length is 100 characters"
         }
       }
+    }
+  },
+  "sidebar": {
+    "users": "Users"
+  },
+  "table": {
+    "rowsPerPage": "Rows per page"
+  },
+  "user": {
+    "table": {
+      "id": "ID",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phoneNumber": "Phone Number",
+      "birthDate": "Birth Date"
+    },
+    "errors": {
+      "incorrectId": "Incorrect ID format"
     }
   }
 }
