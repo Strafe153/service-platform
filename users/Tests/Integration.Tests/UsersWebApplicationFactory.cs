@@ -47,6 +47,7 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
     public static Guid JokerId => Guid.Parse("d2399895-cdfb-4329-a487-9d94ab31fbe2");
     public static Guid CrowId => Guid.Parse("2e26ecc2-3476-49e1-bab5-4f97d031a2c3");
     public static Guid FoxId => Guid.Parse("df07d570-eb42-457e-89fd-51781ab7db94");
+    public static Guid SkullId => Guid.Parse("10a43689-df86-4aae-8c0e-4ea4223acd66");
 
     public string KeycloakTokenUrl
     {
@@ -173,6 +174,15 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
                 '0991098277',
                 '2000-09-29',
                 '2e34290a-4c44-4f8c-add4-7839f36559ee'
+            ),
+            (
+                '{SkullId}',
+                'skull@phantoms.com',
+                'Ryuji',
+                'Sakamoto',
+                '0959348791',
+                '2000-06-13',
+                '8adad3e2-2613-4923-80c4-5d1e9d80b39a'
             )
 
             INSERT INTO Addresses
@@ -218,6 +228,13 @@ public class UsersWebApplicationFactory : WebApplicationFactory<Program>, IAsync
                 'Tokyo',
                 'Jinbocho',
                 '101-0051'
+            ),
+            (
+                '{SkullId}',
+                'Japan',
+                'Tokyo',
+                'Kichijoji',
+                '180-0002'
             )
         """);
 #pragma warning restore EF1002

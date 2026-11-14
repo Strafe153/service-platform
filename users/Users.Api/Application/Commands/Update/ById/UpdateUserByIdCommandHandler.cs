@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Users.Api.Telemetry;
 using Users.Domain.Aggregates.User;
 
-namespace Users.Api.Application.Commands.Update;
+namespace Users.Api.Application.Commands.Update.ById;
 
-public sealed class UpdateUserCommandHandler(
+public sealed class UpdateUserByIdCommandHandler(
     IUsersRepository usersRepository,
-    ILogger<UpdateUserCommandHandler> logger)
+    ILogger<UpdateUserByIdCommandHandler> logger)
         : IRequestHandler<IdentifiedCommand<Guid, UpdateUserCommand, Unit>, Unit>
 {
     public async Task<Unit> Handle(

@@ -20,7 +20,7 @@ public sealed class GetCurrentQueryHandler(
         }
 
         var user = await usersRepository.GetByAuthProviderIdAsync(authProviderId.Value, cancellationToken)
-            ?? throw new NullReferenceException($"User with auth provider id {authProviderId} not found.");
+            ?? throw new NullReferenceException($"User with auth provider id {authProviderId.Value} not found.");
 
         return user.ToReadDto();
     }

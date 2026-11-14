@@ -6,4 +6,4 @@ public sealed record UpdateUserCommand(
     string FirstName,
     string LastName,
     string PhoneNumber,
-    DateOnly BirthDate) : IRequest;
+    DateOnly BirthDate) : IRequest<Unit>;

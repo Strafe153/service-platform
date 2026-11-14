@@ -250,6 +250,27 @@
       ]
     },
     {
+      "id": "8adad3e2-2613-4923-80c4-5d1e9d80b39a",
+      "username": "skull",
+      "email": "skull@phantoms.com",
+      "enabled": true,
+      "firstName": "Yusuke",
+      "lastName": "Kitagawa",
+      "attributes": {
+        "user_id": [ "10a43689-df86-4aae-8c0e-4ea4223acd66" ]
+      },
+      "realmRoles": [
+        "default-roles-users"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ryujirules",
+          "temporary": false
+        }
+      ]
+    },
+    {
       "username": "service-account-admin-api",
       "enabled": true,
       "serviceAccountClientId": "admin-api",

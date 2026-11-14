@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Users.Api.Application.Commands;
 using Users.Api.Application.Commands.Create;
-using Users.Api.Application.Commands.Delete;
+using Users.Api.Application.Commands.Delete.ById;
+using Users.Api.Application.Commands.Delete.Current;
 using Users.Api.Application.Commands.Update;
 using Users.Api.Application.Commands.UpdateAddress;
 using Users.Api.Application.Queries.Dto;
@@ -28,9 +29,6 @@ public static class UserEndpoints
             .WithName(nameof(GetById))
             .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
 
-        group.MapGet("me", GetCurrent)
-            .RequireAuthorization();
-
         group.MapPost(string.Empty, Create);
 
         group.MapPut(idSpecifier, Update)
@@ -41,6 +39,14 @@ public static class UserEndpoints
 
         group.MapDelete(idSpecifier, Delete)
             .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
+
+        var meGroup = group
+            .MapGroup("me")
+            .RequireAuthorization();
+
+        meGroup.MapGet(string.Empty, GetCurrent);
+        meGroup.MapPut(string.Empty, UpdateCurrent);
+        meGroup.MapDelete(string.Empty, DeleteCurrent);
     }
 
     public static async Task<Ok<PageDto<UserReadDto>>> Get(
@@ -58,14 +64,6 @@ public static class UserEndpoints
         CancellationToken cancellationToken)
     {
         var user = await sender.Send(request, cancellationToken);
-        return TypedResults.Ok(user);
-    }
-
-    public static async Task<Ok<UserReadDto>> GetCurrent(
-        [FromServices] ISender sender,
-        CancellationToken cancellationToken)
-    {
-        var user = await sender.Send(GetCurrentQuery.Instance, cancellationToken);
         return TypedResults.Ok(user);
     }
 
@@ -104,10 +102,35 @@ public static class UserEndpoints
 
     public static async Task<NoContent> Delete(
         [FromServices] ISender sender,
-        [AsParameters] DeleteUserCommand command,
+        [AsParameters] DeleteUserByIdCommand command,
         CancellationToken cancellationToken)
     {
         await sender.Send(command, cancellationToken);
+        return TypedResults.NoContent();
+    }
+
+    public static async Task<Ok<UserReadDto>> GetCurrent(
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var user = await sender.Send(GetCurrentQuery.Instance, cancellationToken);
+        return TypedResults.Ok(user);
+    }
+
+    public static async Task<NoContent> UpdateCurrent(
+        [FromServices] ISender sender,
+        [FromBody] UpdateUserCommand command,
+        CancellationToken cancellationToken)
+    {
+        await sender.Send(command, cancellationToken);
+        return TypedResults.NoContent();
+    }
+
+    public static async Task<NoContent> DeleteCurrent(
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken)
+    {
+        await sender.Send(DeleteCurrentUserCommand.Instance, cancellationToken);
         return TypedResults.NoContent();
     }
 }

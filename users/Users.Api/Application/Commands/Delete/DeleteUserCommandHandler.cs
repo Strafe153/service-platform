@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Sdk.Admin;
 using MassTransit;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Users.Api.Configurations.Messaging;
@@ -13,34 +12,47 @@ using Users.Domain.Events;
 
 namespace Users.Api.Application.Commands.Delete;
 
-public sealed class DeleteUserCommandHandler(
-    IUsersRepository usersRepository,
-    IKeycloakClient keycloakClient,
-    IPublishEndpoint publishEndpoint,
-    IOptions<KeycloakAuthenticationOptions> keycloakOptions,
-    ILogger<DeleteUserCommandHandler> logger) : IRequestHandler<DeleteUserCommand>
+public abstract class DeleteUserCommandHandler
 {
-    public async Task Handle(DeleteUserCommand request, CancellationToken cancellationToken)
+    private readonly IKeycloakClient _keycloakClient;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IOptions<KeycloakAuthenticationOptions> _keycloakOptions;
+    private readonly ILogger _logger;
+
+    protected readonly IUsersRepository _usersRepository;
+
+    public DeleteUserCommandHandler(
+        IUsersRepository usersRepository,
+        IKeycloakClient keycloakClient,
+        IPublishEndpoint publishEndpoint,
+        IOptions<KeycloakAuthenticationOptions> keycloakOptions,
+        ILogger logger)
+    {
+        _usersRepository = usersRepository;
+        _keycloakClient = keycloakClient;
+        _publishEndpoint = publishEndpoint;
+        _keycloakOptions = keycloakOptions;
+        _logger = logger;
+    }
+
+    protected async Task DeleteUserAsync(User user, CancellationToken cancellationToken)
     {
         using var activity = UsersTelemetry.ActivitySource.StartActivity("users.delete");
 
         try
         {
-            var user = await usersRepository.GetByIdAsync(request.Id, cancellationToken)
-                ?? throw new NullReferenceException($"User with id {request.Id} not found.");
+            _usersRepository.Delete(user);
+            await _usersRepository.SaveChangesAsync(cancellationToken);
 
-            usersRepository.Delete(user);
-            await usersRepository.SaveChangesAsync(cancellationToken);
-
-            var userResponse = await keycloakClient.DeleteUserWithResponseAsync(
-                keycloakOptions.Value.Realm,
+            var userResponse = await _keycloakClient.DeleteUserWithResponseAsync(
+                _keycloakOptions.Value.Realm,
                 user.AuthProviderId,
                 cancellationToken);
 
             await userResponse.ThrowIfNotSuccessKeycloakStatusCodeAsync(cancellationToken);
             await PublishUserDeletedEventAsync(user, cancellationToken);
 
-            logger.LogInformation("Successfully deleter the user with Id={Id}", user.Id);
+            _logger.LogInformation("Successfully deleted the user with Id={Id}", user.Id);
             UsersTelemetry.UsersDeleted.Add(1);
 
             activity?
@@ -50,7 +62,8 @@ public sealed class DeleteUserCommandHandler(
         }
         catch (DbUpdateException)
         {
-            logger.LogError("Failed to delete the user with Id={Id} due to a database failure", request.Id);
+
+            _logger.LogError("Failed to delete the user with Id={Id} due to a database failure", user.Id);
             UsersTelemetry.UserDeletionFailures.IncrementError();
             activity?.SetStatus(ActivityStatusCode.Error, "Database update failed");
 
@@ -58,9 +71,9 @@ public sealed class DeleteUserCommandHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 "Failed to delete the user with Id={Id} due to the exception: {Exception}",
-                request.Id,
+                user.Id,
                 ex.Message);
 
             UsersTelemetry.UserDeletionFailures.IncrementError();
@@ -74,7 +87,7 @@ public sealed class DeleteUserCommandHandler(
     {
         UserDeletedEvent userDeletedEvent = new(user.Email, DateTime.UtcNow);
 
-        var eventTask = publishEndpoint.Publish(
+        var eventTask = _publishEndpoint.Publish(
             userDeletedEvent,
             c =>
             {

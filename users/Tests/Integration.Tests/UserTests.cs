@@ -14,6 +14,8 @@ namespace Integration.Tests;
 public class UserTests(UsersWebApplicationFactory factory)
     : IClassFixture<UsersWebApplicationFactory>, IDisposable
 {
+    private const string MeEndpoint = "users/me";
+
     private readonly HttpClient _configClient = new();
 
     [Fact]
@@ -324,13 +326,13 @@ public class UserTests(UsersWebApplicationFactory factory)
 
     [Theory]
     [MemberData(nameof(GetInvalidUpdateUserData))]
-    public async Task Update_Should_ReturnBadRequest_WhenUserIsInValid(UpdateUserCommand command)
+    public async Task Update_Should_ReturnBadRequest_WhenDtoIsInValid(UpdateUserCommand command)
     {
         // Arrange
         var client = factory.CreateClient();
         CancellationTokenSource tokenSrc = new();
 
-        var token =  await GetJokerAccessToken();
+        var token = await GetJokerAccessToken();
         SetBearerToken(client, token);
 
         // Act
@@ -569,6 +571,132 @@ public class UserTests(UsersWebApplicationFactory factory)
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GetCurrent_Should_ReturnUnauthorized_WhenTokenIsNotProvided()
+    {
+        // Arrange
+        var client = factory.CreateClient();
+        CancellationTokenSource tokenSrc = new();
+        
+        // Act
+        var response = await client.GetAsync(MeEndpoint, tokenSrc.Token);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetCurrent_Should_ReturnOk_WhenTokenIsProvided()
+    {
+        // Arrange
+        var client = factory.CreateClient();
+        CancellationTokenSource tokenSrc = new();
+
+        var token =  await GetJokerAccessToken();
+        SetBearerToken(client, token);
+        
+        // Act
+        var response = await client.GetAsync(MeEndpoint, tokenSrc.Token);
+        var dto = await response.Content.ReadFromJsonAsync<UserReadDto>(tokenSrc.Token);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(dto);
+        Assert.Equal(UsersWebApplicationFactory.JokerId, dto.Id);
+    }
+
+    [Fact]
+    public async Task UpdateCurrent_Should_ReturnUnauthorized_WhenTokenIsNotProvided()
+    {
+        // Arrange
+        var client = factory.CreateClient();
+        CancellationTokenSource tokenSrc = new();
+
+        UpdateUserCommand command = new(
+            "Akira",
+            "Kurusu",
+            "0992384795",
+            new DateOnly(1987, 2, 3));
+
+        // Act
+        var response = await client.PutAsJsonAsync(MeEndpoint, command, tokenSrc.Token);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateCurrent_Should_ReturnNoContent_WhenTokenIsProvided()
+    {
+        // Arrange
+        var client = factory.CreateClient();
+        CancellationTokenSource tokenSrc = new();
+
+        UpdateUserCommand command = new(
+            "Akira",
+            "Kurusu",
+            "0992384795",
+            new DateOnly(1987, 2, 3));
+
+        var token =  await GetJokerAccessToken();
+        SetBearerToken(client, token);
+
+        // Act
+        var response = await client.PutAsJsonAsync(MeEndpoint, command, tokenSrc.Token);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetInvalidUpdateUserData))]
+    public async Task UpdateCurrent_Should_ReturnBadRequest_WhenDtoIsInValid(UpdateUserCommand command)
+    {
+        // Arrange
+        var client = factory.CreateClient();
+        CancellationTokenSource tokenSrc = new();
+
+        var token = await GetJokerAccessToken();
+        SetBearerToken(client, token);
+
+        // Act
+        var response = await client.PutAsJsonAsync(MeEndpoint, command, tokenSrc.Token);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteCurrent_Should_ReturnUnauthorized_WhenTokenIsNotProvided()
+    {
+        // Arrange
+        var client = factory.CreateClient();
+        CancellationTokenSource tokenSrc = new();
+
+        // Act
+        var response = await client.DeleteAsync(MeEndpoint, tokenSrc.Token);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteCurrent_Should_ReturnNoContent_WhenTokenIsProvided()
+    {
+        // Arrange
+        var client = factory.CreateClient();
+        CancellationTokenSource tokenSrc = new();
+
+        var token =  await GetSkullAccessToken();
+        SetBearerToken(client, token);
+
+        // Act
+        var response = await client.DeleteAsync(MeEndpoint, tokenSrc.Token);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
     public static IEnumerable<object[]> GetInvalidCreateUserData() =>
     [
         [
@@ -757,4 +885,5 @@ public class UserTests(UsersWebApplicationFactory factory)
     private Task<string?> GetJokerAccessToken() => GetAccessToken("joker@mail.com", "phantoms12");
 
     private Task<string?> GetCrowAccessToken() => GetAccessToken("crow@pubsec.com", "ju5t1c3");
+    private Task<string?> GetSkullAccessToken() => GetAccessToken("skull@phantoms.com", "ryujirules");
 }
