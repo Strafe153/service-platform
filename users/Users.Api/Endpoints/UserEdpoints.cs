@@ -28,6 +28,9 @@ public static class UserEndpoints
             .WithName(nameof(GetById))
             .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
 
+        group.MapGet("me", GetCurrent)
+            .RequireAuthorization();
+
         group.MapPost(string.Empty, Create);
 
         group.MapPut(idSpecifier, Update)
@@ -55,6 +58,14 @@ public static class UserEndpoints
         CancellationToken cancellationToken)
     {
         var user = await sender.Send(request, cancellationToken);
+        return TypedResults.Ok(user);
+    }
+
+    public static async Task<Ok<UserReadDto>> GetCurrent(
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var user = await sender.Send(GetCurrentQuery.Instance, cancellationToken);
         return TypedResults.Ok(user);
     }
 
