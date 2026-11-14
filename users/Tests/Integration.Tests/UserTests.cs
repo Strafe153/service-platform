@@ -885,5 +885,6 @@ public class UserTests(UsersWebApplicationFactory factory)
     private Task<string?> GetJokerAccessToken() => GetAccessToken("joker@mail.com", "phantoms12");
 
     private Task<string?> GetCrowAccessToken() => GetAccessToken("crow@pubsec.com", "ju5t1c3");
+    
     private Task<string?> GetSkullAccessToken() => GetAccessToken("skull@phantoms.com", "ryujirules");
 }
