@@ -13,7 +13,7 @@ using Users.Domain.Events;
 
 namespace Users.Api.Application.Commands.Delete;
 
-public class DeleteUserCommandHandler(
+public sealed class DeleteUserCommandHandler(
     IUsersRepository usersRepository,
     IKeycloakClient keycloakClient,
     IPublishEndpoint publishEndpoint,

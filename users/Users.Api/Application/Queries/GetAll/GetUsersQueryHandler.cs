@@ -6,18 +6,12 @@ using Users.Domain.Aggregates.User;
 
 namespace Users.Api.Application.Queries.GetAll;
 
-public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PageDto<UserReadDto>>
+public sealed class GetUsersQueryHandler(IUsersRepository usersRepository)
+    : IRequestHandler<GetUsersQuery, PageDto<UserReadDto>>
 {
-    private readonly IUsersRepository _usersRepository;
-    
-    public GetUsersQueryHandler(IUsersRepository usersRepository)
-    {
-        _usersRepository = usersRepository;
-    }
-
     public Task<PageDto<UserReadDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
-        var query = _usersRepository.Get();
+        var query = usersRepository.Get();
 
         var dtos = query
             .Skip((request.PageNumber - 1) * request.PageSize)

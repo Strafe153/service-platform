@@ -6,24 +6,16 @@ namespace Users.Api.Configurations.Authorization;
 public class RequiredRoleOrRequestedUserHandler
     : AuthorizationHandler<RequiredRoleOrRequestedUserRequirement>
 {
-    protected override async Task HandleRequirementAsync(
+    protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         RequiredRoleOrRequestedUserRequirement requirement)
     {
-        if (context.User.IsInRole(requirement.Role))
+        if (context.User.IsInRole(requirement.Role) || IsSameUserRequested(context))
         {
             context.Succeed(requirement);
-            return;
         }
 
-        var isSameUser = IsSameUserRequested(context);
-
-        if (!isSameUser)
-        {
-            return;
-        }
-
-        context.Succeed(requirement);
+        return Task.CompletedTask;
     }
 
     private static bool IsSameUserRequested(AuthorizationHandlerContext context)

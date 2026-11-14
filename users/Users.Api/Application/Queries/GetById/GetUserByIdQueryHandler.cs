@@ -5,18 +5,12 @@ using Users.Domain.Aggregates.User;
 
 namespace Users.Api.Application.Queries.GetById;
 
-public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserReadDto>
+public sealed class GetUserByIdQueryHandler(IUsersRepository usersRepository)
+    : IRequestHandler<GetUserByIdQuery, UserReadDto>
 {
-    private readonly IUsersRepository _usersRepository;
-
-    public GetUserByIdQueryHandler(IUsersRepository usersRepository)
-    {
-        _usersRepository = usersRepository;
-    }
-
     public async Task<UserReadDto> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdAsync(request.Id, cancellationToken)
+        var user = await usersRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NullReferenceException($"User with id {request.Id} not found.");
 
         return user.ToReadDto();

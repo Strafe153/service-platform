@@ -6,7 +6,7 @@ using Users.Domain.Aggregates.User;
 
 namespace Users.Api.Application.Commands.Update;
 
-public class UpdateUserCommandHandler(
+public sealed class UpdateUserCommandHandler(
     IUsersRepository usersRepository,
     ILogger<UpdateUserCommandHandler> logger)
         : IRequestHandler<IdentifiedCommand<Guid, UpdateUserCommand, Unit>, Unit>
