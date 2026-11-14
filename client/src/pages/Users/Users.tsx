@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { getUsers } from "../services/usersService";
+import { getUsers } from "../../services/usersService";
 import { type GridColDef } from "@mui/x-data-grid";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import ErrorMessage from "../components/common/ErrorMessage";
-import { buildFlexGridColumn } from "../utils/layout.utils";
-import type { UserReadDto } from "../types/user.types";
-import type { Page } from "../types/common.types";
-import DataTable from "../components/common/DataTable";
-import usePaginationModel from "../hooks/usePaginationModel";
+import ErrorMessage from "../../components/common/ErrorMessage";
+import { buildFlexGridColumn } from "../../utils/layout.utils";
+import type { UserReadDto } from "../../types/user.types";
+import type { Page } from "../../types/common.types";
+import DataTable from "../../components/common/DataTable";
+import usePaginationModel from "../../hooks/usePaginationModel";
 
 export default function Users() {
   const [paginationModel, setPaginationModel] = usePaginationModel();

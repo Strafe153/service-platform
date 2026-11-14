@@ -1,11 +1,12 @@
 import { Routes, Route } from "react-router";
 import Home from "../pages/Home";
 import SignUp from "../pages/SignUp";
-import Users from "../pages/Users";
+import Users from "../pages/Users/Users";
 import Forbidden from "../pages/Forbidden";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import { isAdmin } from "../services/authService";
-import User from "../pages/User";
+import UserProfile from "../pages/Users/UserProfile";
+import CurrentUserProfile from "../pages/Users/CurrentUserProfile";
 
 export default function AppRoutes() {
   return (
@@ -15,7 +16,11 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute checkFn={isAdmin} />}>
         <Route path="/users" element={<Users />} />
-        <Route path="/users/:id" element={<User />} />
+        <Route path="/users/:id" element={<UserProfile />} />
+      </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/me" element={<CurrentUserProfile />} />
       </Route>
 
       <Route path="/forbidden" element={<Forbidden />} />

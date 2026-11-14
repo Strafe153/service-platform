@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, Button, TextField } from "@mui/material";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { registerUser } from "../services/usersService";
 import { defaultUserModel, validateuserRegisterModel } from "../utils/user.utils";
 import { login } from "../services/authService";
@@ -15,11 +15,16 @@ export default function SignUp() {
   const [user, setUser] = useState<UserRegisterDto>(defaultUserModel());
   const [validationErrors, setValidationErrors] = useState<Partial<Record<UserRegisterForm, string | undefined>>>({});
   const [snackbarError, setSnackbarError] = useState<string | undefined>(undefined);
+  
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   const mutation = useMutation({
     mutationFn: registerUser,
-    onSuccess: login,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      login();
+    },
     onError: (e) => setSnackbarError(e.message),
   });
 

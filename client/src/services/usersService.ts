@@ -19,3 +19,7 @@ export function getUsers(dto: GetUsersDto): Promise<Page<UserReadDto>> {
 export function getUser(id: Guid): Promise<UserReadDto> {
   return fetchJson(`${baseUrl}/${id}`);
 }
+
+export function getCurrentUser(): Promise<UserReadDto> {
+  return fetchJson(`${baseUrl}/me`);
+}

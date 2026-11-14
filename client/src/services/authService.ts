@@ -38,3 +38,7 @@ export function isAuthenticated(): boolean {
 export function isAdmin(): boolean {
   return keycloak.hasResourceRole("admin", userResource);
 }
+
+export function getSubId(): string | undefined {
+  return keycloak.subject;
+}

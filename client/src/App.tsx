@@ -30,7 +30,6 @@ export default function App() {
         <Box
           sx={{
             display: "flex",
-            flexDirection: "row",
             minHeight: "100vh",
           }}
         >
@@ -52,6 +51,8 @@ export default function App() {
             <Box
               component="main"
               sx={{
+                display: "flex",
+                flexDirection: "column",
                 flexGrow: 1,
                 mx: 3,
                 my: 3,

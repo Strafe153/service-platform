@@ -86,6 +86,19 @@
       "phoneNumber": "Номер телефону",
       "birthDate": "Дата народження"
     },
+    "profile": {
+      "personalInfo": "Персональна інформація",
+      "email": "Електронна адреса",
+      "fullName": "Ім'я та прізвище",
+      "phoneNumber": "Номер телефону",
+      "birthDate": "Дата народження",
+      "address": "Адреса",
+      "country": "Країна",
+      "state": "Область",
+      "city": "Місто",
+      "zipCode": "Індекс",
+      "street": "Вулиця"
+    },
     "errors": {
       "incorrectId": "Неправильний формат ID"
     }

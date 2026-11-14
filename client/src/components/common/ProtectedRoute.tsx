@@ -1,13 +1,15 @@
-import { Navigate, Outlet } from "react-router";
+import { Navigate, Outlet, useParams, type Params } from "react-router";
 import { isAuthenticated, login } from "../../services/authService";
 import { useEffect } from "react";
 
 type ProtectedRouteProps = {
-  checkFn?: () => boolean;
+  checkFn?: (params: Readonly<Params<string>>) => boolean;
   checkAuthorized?: boolean;
 };
 
 export default function ProtectedRoute({ checkFn, checkAuthorized = true }: ProtectedRouteProps) {
+  const params = useParams();
+
   const requireLogin = checkAuthorized && !isAuthenticated();
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export default function ProtectedRoute({ checkFn, checkAuthorized = true }: Prot
     return null;
   }
 
-  if (checkFn && !checkFn()) {
+  if (checkFn && !checkFn(params)) {
     return <Navigate to="/forbidden" replace />
   }
 

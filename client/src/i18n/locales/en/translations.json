@@ -86,6 +86,19 @@
       "phoneNumber": "Phone Number",
       "birthDate": "Birth Date"
     },
+    "profile": {
+      "personalInfo": "Personal information",
+      "email": "Email",
+      "fullName": "Name",
+      "phoneNumber": "Phone Number",
+      "birthDate": "Birth Date",
+      "address": "Address",
+      "country": "Country",
+      "state": "State",
+      "city": "City",
+      "zipCode": "Zip Code",
+      "street": "Street"
+    },
     "errors": {
       "incorrectId": "Incorrect ID format"
     }
