@@ -1,14 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "../../components/common/ErrorMessage";
-import UserView from "../../features/user-profile/UserView";
-import { getCurrentUser } from "../../services/usersService";
+import { getCurrentUser, updateCurrentUser } from "../../services/usersService";
 import { getSubId } from "../../services/authService";
+import UserDetails from "../../features/user-profile/UserDetails";
 
 export default function CurrentUserProfile() {
-  const subId = getSubId();
-
   const { data: user, isError, error } = useQuery({
-    queryKey: ["users", subId],
+    queryKey: ["users", getSubId()],
     queryFn: getCurrentUser,
   });
 
@@ -17,11 +15,12 @@ export default function CurrentUserProfile() {
   }
 
   return (
-    <UserView
+    <UserDetails
       user={user}
+      checkId={false}
       isError={isError}
       error={error}
-      checkId={false}
+      updateUserFn={(_, dto) => updateCurrentUser(dto)}
     />
   );
 }

@@ -1,19 +1,21 @@
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Button, Divider, Typography } from "@mui/material";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import CenteredBox from "../../components/common/CenteredBox";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import { isGuid } from "../../utils/common.utils";
 import type { UserReadDto } from "../../types/user.types";
+import type { ParameterlessAction } from "../../types/common.types";
 
 type UserViewProps = {
   user: UserReadDto | undefined;
   isError: boolean;
   error: Error | null;
   checkId: boolean;
+  setEditMode: ParameterlessAction;
 };
 
-export default function UserView({ user, isError, error, checkId }: UserViewProps) {
+export default function UserView({ user, isError, error, checkId, setEditMode }: UserViewProps) {
   const params = useParams();
   const { t } = useTranslation();
 
@@ -46,6 +48,16 @@ export default function UserView({ user, isError, error, checkId }: UserViewProp
 
         {user?.address.street
           && <Typography>{t("user.profile.street")}: {user?.address.street}</Typography>}
+
+        <Button
+          onClick={setEditMode}
+          sx={{
+            width: "100%",
+            mt: 2,
+          }}
+        >
+          {t("user.edit")}
+        </Button>
       </Box>
     </CenteredBox>
   );

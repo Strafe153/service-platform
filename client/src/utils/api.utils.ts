@@ -26,14 +26,20 @@ export async function fetchJson<T>(
     headers,
   });
 
-  if (!response.ok) {
+  if (response.status >= 400) {
     const errorResponse: ErrorResponse = await response.json();
     const errorMessage = errorResponse.errors.map((e) => `${e.property}: ${e.error}`).join("\n");
 
     throw new Error(errorMessage);
   }
 
-  return response.json();
+  const responseStr = await response.text();
+
+  if (!responseStr) {
+    return undefined as T;
+  }
+
+  return JSON.parse(responseStr);
 }
 
 export function populateQueryParameters<T extends object>(url: string, dto: T): URL {

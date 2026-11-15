@@ -31,6 +31,7 @@ export default function DataTable<R>({
         pageSizeOptions={pageSizeOptions}
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
+        disableRowSelectionOnClick
         localeText={{
           paginationRowsPerPage: t("table.rowsPerPage"),
         }}

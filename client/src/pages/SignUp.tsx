@@ -3,23 +3,26 @@ import { useTranslation } from "react-i18next";
 import { Box, Button, TextField } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { registerUser } from "../services/usersService";
-import { defaultUserModel, validateuserRegisterModel } from "../utils/user.utils";
+import { defaultUserRegisterModel, validateuserRegisterModel } from "../utils/user.utils";
 import { login } from "../services/authService";
 import Row from "../components/common/Row";
 import Alert from "../components/common/Alert";
 import type { AddressDto, UserRegisterDto } from "../types/user.types";
+import CenteredBox from "../components/common/CenteredBox";
+import useValidation from "../hooks/useValidation";
 
-type UserRegisterForm = keyof (Omit<UserRegisterDto, "address"> & AddressDto);
+type UserRegisterForm = (Omit<UserRegisterDto, "address"> & AddressDto);
 
 export default function SignUp() {
-  const [user, setUser] = useState<UserRegisterDto>(defaultUserModel());
-  const [validationErrors, setValidationErrors] = useState<Partial<Record<UserRegisterForm, string | undefined>>>({});
+  const [user, setUser] = useState<UserRegisterDto>(defaultUserRegisterModel());
+  const { validate, errors, setErrors } = useValidation<UserRegisterDto, UserRegisterForm>(
+    () => validateuserRegisterModel(user));
   const [snackbarError, setSnackbarError] = useState<string | undefined>(undefined);
   
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const mutation = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: registerUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -29,7 +32,7 @@ export default function SignUp() {
   });
 
   function update(name: string, updateFn: (prev: UserRegisterDto) => UserRegisterDto) {
-    setValidationErrors((prev) => ({
+    setErrors((prev) => ({
       ...prev,
       [name]: undefined,
     }));
@@ -57,24 +60,11 @@ export default function SignUp() {
       }
     }));
   }
-
+  
   function signUp() {
-    const { success, error } = validateuserRegisterModel(user);
-
-    if (!success) {
-      const errors: Partial<Record<UserRegisterForm, string>> = {};
-
-      for (const issue of error.issues) {
-        const field = issue.path[issue.path.length - 1] as UserRegisterForm;
-        errors[field] = issue.message;
-      }
-
-      setValidationErrors(errors);
-      return;
+    if (validate()) {
+      mutate(user);
     }
-
-    setValidationErrors({});
-    mutation.mutate(user);
   }
 
   function closeErrorSnackbar() {
@@ -83,14 +73,7 @@ export default function SignUp() {
 
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "calc(100vh - 18.5vh)",
-        }}
-      >
+      <CenteredBox>
         <Box
           component="form"
           sx={{
@@ -98,62 +81,60 @@ export default function SignUp() {
             flexDirection: "column",
             justifyContent: "center",
             gap: 2,
-            width: "100%",
             maxWidth: 600,
-            mx: "auto",
           }}
         >
           <Row>
             <TextField
               name="firstName"
-              label={t("registration.form.firstName")}
+              label={t("registration.firstName")}
               variant="outlined"
               fullWidth
               required
               onChange={updateUser}
-              error={!!validationErrors.firstName}
-              helperText={validationErrors.firstName ? t(validationErrors.firstName) : undefined}
+              error={!!errors.firstName}
+              helperText={errors.firstName ? t(errors.firstName) : undefined}
             />
             <TextField
               name="lastName"
-              label={t("registration.form.lastName")}
+              label={t("registration.lastName")}
               variant="outlined"
               fullWidth
               required
               onChange={updateUser}
-              error={!!validationErrors.lastName}
-              helperText={validationErrors.lastName ? t(validationErrors.lastName) : undefined}
+              error={!!errors.lastName}
+              helperText={errors.lastName ? t(errors.lastName) : undefined}
             />
           </Row>
 
           <Row>
             <TextField
               name="email"
-              label={t("registration.form.email")}
+              label={t("registration.email")}
               variant="outlined"
               type="email"
               fullWidth
               required
               onChange={updateUser}
-              error={!!validationErrors.email}
-              helperText={validationErrors.email ? t(validationErrors.email) : undefined}
+              error={!!errors.email}
+              helperText={errors.email ? t(errors.email) : undefined}
             />
             <TextField
               name="phoneNumber"
-              label={t("registration.form.phoneNumber")}
+              label={t("registration.phoneNumber")}
               variant="outlined"
               fullWidth
               required
               onChange={updateUser}
-              error={!!validationErrors.phoneNumber}
-              helperText={validationErrors.phoneNumber ? t(validationErrors.phoneNumber) : undefined}
+              error={!!errors.phoneNumber}
+              helperText={errors.phoneNumber ? t(errors.phoneNumber) : undefined}
             />
           </Row>
 
           <Row>
             <TextField
               name="birthDate"
-              label={t("registration.form.birthDate")}
+              label={t("registration.birthDate")}
               variant="outlined"
               type="date"
               fullWidth
@@ -164,80 +145,85 @@ export default function SignUp() {
                 },
               }}
               onChange={updateUser}
-              error={!!validationErrors.birthDate}
-              helperText={validationErrors.birthDate ? t(validationErrors.birthDate) : undefined}
+              error={!!errors.birthDate}
+              helperText={errors.birthDate ? t(errors.birthDate) : undefined}
             />
             <TextField
               name="password"
-              label={t("registration.form.password")}
+              label={t("registration.password")}
               variant="outlined"
               type="password"
               fullWidth
               required
               onChange={updateUser}
-              error={!!validationErrors.password}
-              helperText={validationErrors.password ? t(validationErrors.password) : undefined}
+              error={!!errors.password}
+              helperText={errors.password ? t(errors.password) : undefined}
             />
           </Row>
 
           <Row>
             <TextField
               name="country"
-              label={t("registration.form.country")}
+              label={t("registration.country")}
               variant="outlined"
               fullWidth
               required
               onChange={updateAddress}
-              error={!!validationErrors.country}
-              helperText={validationErrors.country ? t(validationErrors.country) : undefined}
+              error={!!errors.country}
+              helperText={errors.country ? t(errors.country) : undefined}
             />
             <TextField
               name="state"
-              label={t("registration.form.state")}
+              label={t("registration.state")}
               variant="outlined"
               fullWidth
               required
               onChange={updateAddress}
-              error={!!validationErrors.state}
-              helperText={validationErrors.state ? t(validationErrors.state) : undefined}
+              error={!!errors.state}
+              helperText={errors.state ? t(errors.state) : undefined}
             />
           </Row>
 
           <Row>
             <TextField
               name="city"
-              label={t("registration.form.city")}
+              label={t("registration.city")}
               variant="outlined"
               fullWidth
               required
               onChange={updateAddress}
-              error={!!validationErrors.city}
-              helperText={validationErrors.city ? t(validationErrors.city) : undefined}
+              error={!!errors.city}
+              helperText={errors.city ? t(errors.city) : undefined}
             />
             <TextField
               name="zipCode"
-              label={t("registration.form.zipCode")}
+              label={t("registration.zipCode")}
               variant="outlined"
               fullWidth
               required
               onChange={updateAddress}
-              error={!!validationErrors.zipCode}
-              helperText={validationErrors.zipCode ? t(validationErrors.zipCode) : undefined}
+              error={!!errors.zipCode}
+              helperText={errors.zipCode ? t(errors.zipCode) : undefined}
             />
             <TextField
               name="street"
-              label={t("registration.form.street")}
+              label={t("registration.street")}
               variant="outlined"
               fullWidth
               onChange={updateAddress}
-              error={!!validationErrors.street}
-              helperText={validationErrors.street ? t(validationErrors.street) : undefined}
+              error={!!errors.street}
+              helperText={errors.street ? t(errors.street) : undefined}
             />
           </Row>
 
-          <Button onClick={signUp} disabled={mutation.isPending}>{t("registration.form.signUp")}</Button>
+          <Button
+            onClick={signUp}
+            disabled={isPending}
+          >
+            {t("registration.signUp")}
+          </Button>
         </Box>
-      </Box>
+      </CenteredBox>
 
       <Alert
         open={!!snackbarError}

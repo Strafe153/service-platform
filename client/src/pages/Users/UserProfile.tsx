@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { getUser } from "../../services/usersService";
+import { getUser, updateUser } from "../../services/usersService";
 import { useParams } from "react-router";
 import type { Guid } from "../../types/common.types";
 import { isGuid } from "../../utils/common.utils";
 import ErrorMessage from "../../components/common/ErrorMessage";
-import UserView from "../../features/user-profile/UserView";
+import UserDetails from "../../features/user-profile/UserDetails";
 
 export default function UserProfile() {
   const params = useParams();
@@ -23,11 +23,12 @@ export default function UserProfile() {
   }
 
   return (
-    <UserView
+    <UserDetails
       user={user}
+      checkId={true}
       isError={isError}
       error={error}
-      checkId={true}
+      updateUserFn={updateUser}
     />
   );
 }

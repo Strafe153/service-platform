@@ -1,8 +1,9 @@
 import type { Guid, Page } from "../types/common.types";
-import type { GetUsersDto, UserReadDto, UserRegisterDto } from "../types/user.types";
+import type { GetUsersDto, UserReadDto, UserRegisterDto, UserUpdateDto } from "../types/user.types";
 import { fetchJson, populateQueryParameters } from "../utils/api.utils";
 
 const baseUrl = import.meta.env.VITE_USERS_URL;
+const meUrl = `${baseUrl}/me`;
 
 export function registerUser(dto: UserRegisterDto): Promise<void> {
   return fetchJson(baseUrl, {
@@ -20,6 +21,32 @@ export function getUser(id: Guid): Promise<UserReadDto> {
   return fetchJson(`${baseUrl}/${id}`);
 }
 
+export function updateUser(id: Guid, dto: UserUpdateDto): Promise<void> {
+  return fetchJson(`${baseUrl}/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(dto),
+  });
+}
+
+export function deleteUser(id: Guid): Promise<void> {
+  return fetchJson(`${baseUrl}/${id}`, {
+    method: "DELETE",
+  });
+}
+
 export function getCurrentUser(): Promise<UserReadDto> {
-  return fetchJson(`${baseUrl}/me`);
+  return fetchJson(meUrl);
+}
+
+export function updateCurrentUser(dto: UserUpdateDto): Promise<void> {
+  return fetchJson(meUrl, {
+    method: "PUT",
+    body: JSON.stringify(dto),
+  });
+}
+
+export function deleteCurrentUser(): Promise<void> {
+  return fetchJson(meUrl, {
+    method: "DELETE",
+  });
 }
