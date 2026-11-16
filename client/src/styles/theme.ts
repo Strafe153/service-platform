@@ -1,43 +1,61 @@
 import { createTheme } from "@mui/material";
 import "@mui/x-data-grid/themeAugmentation";
 
+const colors = {
+  primary: "#1a73e8",
+  primaryDark: "#1557b0",
+  primaryLight: "#4a9eff",
+  primaryDeep: "#0d47a1",
+  primaryTint: "#e8f0fe",
+
+  secondary: "#5f6368",
+  secondaryLight: "#8d9196",
+  secondaryDark: "#373d42",
+
+  error: "#d32f2f",
+  errorDark: "#b71c1c",
+
+  white: "#ffffff",
+  backgroundDefault: "#f5f7fa",
+  backgroundHover: "#f0f4ff",
+
+  textPrimary: "#202124",
+  divider: "#e0e0e0",
+} as const;
+
+const border = `1px solid ${colors.divider}`;
+const smallRadius = 6;
+
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1a73e8",
-      light: "#4a9eff",
-      dark: "#0d47a1",
-      contrastText: "#ffffff",
+      main: colors.primary,
+      light: colors.primaryLight,
+      dark: colors.primaryDeep,
+      contrastText: colors.white,
     },
     secondary: {
-      main: "#5f6368",
-      light: "#8d9196",
-      dark: "#373d42",
-      contrastText: "#ffffff",
+      main: colors.secondary,
+      light: colors.secondaryLight,
+      dark: colors.secondaryDark,
+      contrastText: colors.white,
     },
     error: {
-      main: "#d32f2f",
+      main: colors.error,
     },
     background: {
-      default: "#f5f7fa",
-      paper: "#ffffff",
+      default: colors.backgroundDefault,
+      paper: colors.white,
     },
     text: {
-      primary: "#202124",
-      secondary: "#5f6368",
+      primary: colors.textPrimary,
+      secondary: colors.secondary,
     },
-    divider: "#e0e0e0",
+    divider: colors.divider,
   },
 
   typography: {
-    fontFamily: [
-      "Inter",
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      "sans-serif",
-    ].join(","),
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
     h5: {
       fontWeight: 600,
       letterSpacing: "-0.01em",
@@ -60,11 +78,6 @@ const theme = createTheme({
       defaultProps: {
         elevation: 0,
       },
-      styleOverrides: {
-        colorPrimary: {
-          backgroundColor: "#1a73e8",
-        },
-      },
     },
 
     MuiButton: {
@@ -74,14 +87,14 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          borderRadius: 6,
+          borderRadius: smallRadius,
           paddingTop: 8,
           paddingBottom: 8,
           "&.MuiButton-containedPrimary:hover": {
-            backgroundColor: "#1557b0",
+            backgroundColor: colors.primaryDark,
           },
           "&.MuiButton-containedError:hover": {
-            backgroundColor: "#b71c1c",
+            backgroundColor: colors.errorDark,
           },
         },
         colorInherit: {
@@ -111,7 +124,7 @@ const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          borderRight: "1px solid #e0e0e0",
+          borderRight: border,
         },
       },
     },
@@ -119,13 +132,13 @@ const theme = createTheme({
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          borderRadius: 6,
+          borderRadius: smallRadius,
           "&:hover": {
-            backgroundColor: "#e8f0fe",
+            backgroundColor: colors.primaryTint,
           },
           "&.Mui-selected": {
-            backgroundColor: "#e8f0fe",
-            color: "#1a73e8",
+            backgroundColor: colors.primaryTint,
+            color: colors.primary,
           },
         },
       },
@@ -134,7 +147,7 @@ const theme = createTheme({
     MuiToggleButtonGroup: {
       styleOverrides: {
         root: {
-          borderRadius: 6,
+          borderRadius: smallRadius,
         },
       },
     },
@@ -142,13 +155,11 @@ const theme = createTheme({
     MuiToggleButton: {
       styleOverrides: {
         root: {
-          textTransform: "none",
-          fontWeight: 500,
           color: "rgba(255,255,255,0.7)",
           borderColor: "rgba(255,255,255,0.4)",
           "&.Mui-selected": {
-            backgroundColor: "#ffffff",
-            color: "#1a73e8",
+            backgroundColor: colors.white,
+            color: colors.primary,
             "&:hover": {
               backgroundColor: "rgba(255,255,255,0.9)",
             },
@@ -156,14 +167,6 @@ const theme = createTheme({
           "&:hover": {
             backgroundColor: "rgba(255,255,255,0.1)",
           },
-        },
-      },
-    },
-
-    MuiDivider: {
-      styleOverrides: {
-        root: {
-          borderColor: "#e0e0e0",
         },
       },
     },
@@ -176,14 +179,14 @@ const theme = createTheme({
         root: {
           border: "none",
           "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "#f5f7fa",
-            borderBottom: "1px solid #e0e0e0",
+            backgroundColor: colors.backgroundDefault,
+            borderBottom: border,
           },
           "& .MuiDataGrid-row:hover": {
-            backgroundColor: "#f0f4ff",
+            backgroundColor: colors.backgroundHover,
           },
           "& .MuiDataGrid-footerContainer": {
-            borderTop: "1px solid #e0e0e0",
+            borderTop: border,
           },
         },
       },
