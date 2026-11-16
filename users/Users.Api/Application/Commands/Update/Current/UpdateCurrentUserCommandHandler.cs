@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using System.Security.Claims;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Users.Api.Extensions;
 using Users.Api.Telemetry;
 using Users.Domain.Aggregates.User;
 
@@ -16,17 +16,12 @@ public sealed class UpdateCurrentUserCommandHandler(
     {
         using var activity = UsersTelemetry.ActivitySource.StartActivity("users.update");
 
-        var authProviderId = contextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);
-
-        if (authProviderId is null || string.IsNullOrEmpty(authProviderId.Value))
-        {
-            throw new NullReferenceException("No auth provider id passed.");
-        }
+        var authProviderId = contextAccessor.GetAuthProviderId();
 
         try
         {
-            var user = await usersRepository.GetByAuthProviderIdAsync(authProviderId.Value, cancellationToken)
-                ?? throw new NullReferenceException($"User with auth provider id {authProviderId.Value} not found.");
+            var user = await usersRepository.GetByAuthProviderIdAsync(authProviderId, cancellationToken)
+                ?? throw new NullReferenceException($"User with auth provider id {authProviderId} not found.");
 
             user.Update(
                 request.FirstName,
@@ -51,7 +46,7 @@ public sealed class UpdateCurrentUserCommandHandler(
         {
             logger.LogError(
                 "Failed to update the user with AuthProviderId={Id} due to a database failure",
-                authProviderId.Value);
+                authProviderId);
 
             UsersTelemetry.UserUpdateFailures.IncrementError();
             activity?.SetStatus(ActivityStatusCode.Error, "Database update failed");
@@ -62,7 +57,7 @@ public sealed class UpdateCurrentUserCommandHandler(
         {
             logger.LogError(
                 "Failed to update the user with AuthProviderId={Id} due to the exception: {Exception}",
-                authProviderId.Value,
+                authProviderId,
                 ex.Message);
 
             UsersTelemetry.UserUpdateFailures.IncrementError();
