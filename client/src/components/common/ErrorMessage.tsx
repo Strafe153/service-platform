@@ -14,12 +14,12 @@ export default function ErrorMessage({ value }: ErrorMessageProps) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "calc(100vh - 18.5vh)",
+        flexGrow: 1,
       }}
     >
       <Typography
-        variant="h2"
-        sx={{ color: "#f00" }}
+        variant="h5"
+        color="error"
       >
         {t(value)}
       </Typography>

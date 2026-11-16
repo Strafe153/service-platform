@@ -37,7 +37,7 @@ export default function DataTable<R>({
         }}
         sx={{
           "& .MuiDataGrid-columnHeaderTitle": {
-            fontWeight: "bold",
+            fontWeight: 600,
           },
         }}
       />
