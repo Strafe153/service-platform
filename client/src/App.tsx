@@ -7,6 +7,7 @@ import theme from "./styles/theme";
 import "./i18n/i18n";
 import { isAdmin } from "./services/authService";
 import type { MenuItem } from "./types/layout.types";
+import Alert from "./components/common/Alert";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,8 @@ export default function App() {
             <Footer />
           </Box>
         </Box>
+        
+        <Alert />
       </QueryClientProvider>
     </ThemeProvider>
   );

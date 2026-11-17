@@ -6,10 +6,10 @@ import { registerUser } from "../services/usersService";
 import { defaultUserRegisterModel, validateuserRegisterModel } from "../utils/user.utils";
 import { login } from "../services/authService";
 import Row from "../components/common/Row";
-import Alert from "../components/common/Alert";
 import type { AddressDto, UserRegisterDto } from "../types/user.types";
 import CenteredBox from "../components/common/CenteredBox";
 import useValidation from "../hooks/useValidation";
+import useAlertStore from "../store/alertStore";
 
 type UserRegisterForm = (Omit<UserRegisterDto, "address"> & AddressDto);
 
@@ -17,7 +17,7 @@ export default function SignUp() {
   const [user, setUser] = useState<UserRegisterDto>(defaultUserRegisterModel());
   const { validate, errors, setErrors } = useValidation<UserRegisterDto, UserRegisterForm>(
     () => validateuserRegisterModel(user));
-  const [snackbarError, setSnackbarError] = useState<string | undefined>(undefined);
+  const setAlertError = useAlertStore((state) => state.setError);
   
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -28,7 +28,7 @@ export default function SignUp() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       login();
     },
-    onError: (e) => setSnackbarError(e.message),
+    onError: (e) => setAlertError(e.message),
   });
 
   function update(name: string, updateFn: (prev: UserRegisterDto) => UserRegisterDto) {
@@ -65,10 +65,6 @@ export default function SignUp() {
     if (validate()) {
       mutate(user);
     }
-  }
-
-  function closeErrorSnackbar() {
-    setSnackbarError(undefined);
   }
 
   return (
@@ -224,12 +220,6 @@ export default function SignUp() {
           </Button>
         </Box>
       </CenteredBox>
-
-      <Alert
-        open={!!snackbarError}
-        message={snackbarError}
-        onClose={closeErrorSnackbar}
-      />
     </>
   );
 }

@@ -10,9 +10,9 @@ import { useParams } from "react-router";
 import type { Guid, ParameterlessAction } from "../../types/common.types";
 import { isGuid } from "../../utils/common.utils";
 import ErrorMessage from "../../components/common/ErrorMessage";
-import Alert from "../../components/common/Alert";
 import { getSubId } from "../../services/authService";
 import useValidation from "../../hooks/useValidation";
+import useAlertStore from "../../store/alertStore";
 
 type EditUserProps = {
   user: UserReadDto | undefined;
@@ -33,9 +33,9 @@ export default function EditUser({
     phoneNumber: user?.phoneNumber?? "",
     birthDate: user?.birthDate.toString() ?? "",
   });
-  const [snackbarError, setSnackbarError] = useState<string | undefined>(undefined);
   const { validate, errors, setErrors } = useValidation(() => validateUserUpdateModel(updateDto));
-  
+  const setAlertError = useAlertStore((state) => state.setError);
+
   const params = useParams();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -48,9 +48,8 @@ export default function EditUser({
 
       setViewMode();
     },
-    onError: (e) => setSnackbarError(e.message),
+    onError: (e) => setAlertError(e.message),
   });
-
 
   if (checkId && !isGuid(params.id)) {
     return <ErrorMessage value="user.errors.incorrectId" />;
@@ -74,10 +73,6 @@ export default function EditUser({
     if (validate()) {
       mutate();
     }
-  }
-
-  function closeErrorSnackbar() {
-    setSnackbarError(undefined);
   }
 
   return (
@@ -169,12 +164,6 @@ export default function EditUser({
           </Row>
         </Box>
       </CenteredBox>
-      
-      <Alert
-        open={!!snackbarError}
-        message={snackbarError}
-        onClose={closeErrorSnackbar}
-      />
     </>
   );
 }

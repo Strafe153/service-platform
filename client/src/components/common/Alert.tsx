@@ -1,28 +1,31 @@
 import { IconButton, Snackbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import type { ParameterlessAction } from "../../types/common.types";
+import useAlertStore from "../../store/alertStore";
 
-type AlertProps = {
-  open: boolean;
-  message: string | undefined;
-  onClose: ParameterlessAction;
-};
+export default function Alert() {
+  const error = useAlertStore((state) => state.error);
+  const setError = useAlertStore((state) => state.setError);
+  const closeAlert = useAlertStore((state) => state.onClose);
 
-export default function Alert({ open, message, onClose }: AlertProps) {
+  function close() {
+    closeAlert?.();
+    setError(undefined);
+  }
+
   return (
     <Snackbar
-      open={open}
-      message={message}
+      open={!!error}
+      message={error}
       autoHideDuration={3000}
       anchorOrigin={{
         vertical: "top",
         horizontal: "right"
       }}
-      onClose={onClose}
+      onClose={close}
       action={
         <IconButton
           sx={{ p: .5 }}
-          onClick={onClose}
+          onClick={close}
         >
           <CloseIcon />
         </IconButton>
