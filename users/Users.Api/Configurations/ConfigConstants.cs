@@ -10,7 +10,5 @@ public static class ConfigConstants
 
     public const string KeycloakAdmin = "KeycloakAdmin";
 
-    public const string Storage = "Storage";
-
     public const string OpenTelemetry = "OpenTelemetry";
 }
