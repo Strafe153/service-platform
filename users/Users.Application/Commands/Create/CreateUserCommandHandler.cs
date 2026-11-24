@@ -5,6 +5,7 @@ using Users.Application.Abstractions;
 using Users.Application.Constants;
 using Users.Application.Exceptions;
 using Users.Application.Mapping;
+using Users.Application.Models;
 using Users.Application.Queries.Dto;
 using Users.Application.Telemetry;
 using Users.Domain.Aggregates.User;
@@ -26,15 +27,14 @@ public sealed class CreateUserCommandHandler(
 
         try
         {
-            URepresentation representation = new()
+            UserRequest request = new()
             {
                 Email = command.Email,
                 FirstName = command.FirstName,
                 LastName = command.LastName,
             };
 
-            representation.Id = await userService.CreateUserAsync(representation, cancellationToken);
-            userId = representation.Id;
+            userId = await userService.CreateUserAsync(request, cancellationToken);
 
             await userService.ResetPasswordAsync(userId, command.Password, cancellationToken);
             var dbUser = await SaveUserAsync(command, userId, cancellationToken);

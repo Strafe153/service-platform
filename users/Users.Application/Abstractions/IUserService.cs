@@ -1,18 +1,11 @@
-namespace Users.Application.Abstractions;
+using Users.Application.Models;
 
-// public record URepresentation(string Email, string FirstName, string LastName);
-public record URepresentation
-{
-    public string Id { get; set; }
-    public string Email { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-}
+namespace Users.Application.Abstractions;
 
 public interface IUserService
 {
     Task<string> CreateUserAsync(
-        URepresentation representation,
+        UserRequest request,
         CancellationToken cancellationToken);
 
     Task ResetPasswordAsync(

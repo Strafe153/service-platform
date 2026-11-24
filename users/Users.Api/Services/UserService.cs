@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Users.Api.Keycloak;
 using Users.Application.Abstractions;
+using Users.Application.Models;
 
 namespace Users.Api.Services;
 
@@ -22,15 +23,15 @@ internal class UserService : IUserService
     }
 
     public async Task<string> CreateUserAsync(
-        URepresentation representation,
+        UserRequest request,
         CancellationToken cancellationToken)
     {
         UserRepresentation user = new()
         {
-            Email = representation.Email,
-            Username = representation.Email,
-            FirstName = representation.FirstName,
-            LastName = representation.LastName,
+            Email = request.Email,
+            Username = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
             Enabled = true,
         };
 
