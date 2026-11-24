@@ -70,14 +70,7 @@ public sealed class CreateUserCommandHandler(
         string userId,
         CancellationToken cancellationToken)
     {
-        User user = new(
-            command.Email,
-            command.FirstName,
-            command.LastName,
-            command.PhoneNumber,
-            command.BirthDate,
-            userId,
-            command.Address);
+        var user = command.ToUser(userId);
 
         usersRepository.Add(user);
         await usersRepository.SaveChangesAsync(cancellationToken);

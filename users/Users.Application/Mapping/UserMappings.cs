@@ -29,6 +29,15 @@ public static class UserExtensions
         return dto;
     }
 
+    public static User ToUser(this CreateUserCommand command, string authProviderId) => new(
+        command.Email,
+        command.FirstName,
+        command.LastName,
+        command.PhoneNumber,
+        command.BirthDate,
+        authProviderId,
+        command.Address);
+
     public static UserRequest ToUserRequest(this CreateUserCommand command) =>
         new(command.Email, command.FirstName, command.LastName);
 }
