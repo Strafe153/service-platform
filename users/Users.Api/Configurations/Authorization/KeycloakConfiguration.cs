@@ -3,7 +3,6 @@ using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Users.Api.Configurations.Authorization;
 
@@ -27,8 +26,6 @@ public static class KeycloakConfigurations
         IConfiguration configuration,
         KeycloakAuthenticationOptions options)
     {
-        services.AddSingleton<IAuthorizationHandler, RequiredRoleOrRequestedUserHandler>();
-
         services
             .AddAuthorization()
             .AddKeycloakAuthorization(configuration, ConfigConstants.Keycloak)
@@ -37,11 +34,6 @@ public static class KeycloakConfigurations
             {
                 string[] roles = [KeycloakConstants.Roles.Admin];
                 p.RequireResourceRolesForClient(options.Resource, roles);
-            })
-            .AddPolicy(KeycloakConstants.Policies.AdminOrRequestedUser, p =>
-            {
-                RequiredRoleOrRequestedUserRequirement requirement = new(KeycloakConstants.Roles.Admin);
-                p.Requirements.Add(requirement);
             });
 
         services.AddAuthorizationServer(configuration);

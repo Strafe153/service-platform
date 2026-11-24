@@ -3,6 +3,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Users.Application.Telemetry;
 
 namespace Users.Api.Configurations.OpenTelemetry;
 
@@ -14,7 +15,7 @@ public static class OpenTelemetryConfiguration
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
         var resourceBuilder = ResourceBuilder.CreateDefault()
-            .AddService(OpenTelemetryOptions.ServiceName, serviceVersion: "1.0.0")
+            .AddService(UsersTelemetry.ServiceName, serviceVersion: "1.0.0")
             .AddAttributes([
                 new KeyValuePair<string, object>("environment", environment),
                 new KeyValuePair<string, object>("host", Environment.MachineName)
@@ -38,11 +39,11 @@ public static class OpenTelemetryConfiguration
                 .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
                 .AddMeter("System.Net.Http")
                 .AddMeter("System.Net.NameResolution")
-                .AddMeter(OpenTelemetryOptions.ServiceName)
+                .AddMeter(UsersTelemetry.ServiceName)
                 .AddOtlpExporter(ConfigureExporter))
             .WithTracing(builder => builder
                 .SetResourceBuilder(resourceBuilder)
-                .AddSource(OpenTelemetryOptions.ServiceName)
+                .AddSource(UsersTelemetry.ServiceName)
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddOtlpExporter(ConfigureExporter));

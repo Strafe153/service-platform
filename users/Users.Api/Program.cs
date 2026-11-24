@@ -5,7 +5,11 @@ using Users.Api.Configurations.Authorization;
 using Users.Api.Configurations.Messaging;
 using Users.Api.Configurations.OpenTelemetry;
 using Users.Api.Endpoints;
+using Users.Api.Services;
+using Users.Application.Abstractions;
 using Users.Domain.Aggregates.User;
+using Users.Infrastructure.HttpClients;
+using Users.Infrastructure.Messaging;
 using Users.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +31,12 @@ builder.Services
     .AddExceptionHandler<ExceptionHandler>();
 
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+
+// Potentially move this registration to their respective projects
+builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMessagePublisher, MessagePublisher>();
+// end
 
 var app = builder.Build();
 

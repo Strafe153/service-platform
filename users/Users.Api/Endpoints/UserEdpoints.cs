@@ -1,16 +1,16 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Users.Api.Application.Commands;
-using Users.Api.Application.Commands.Create;
-using Users.Api.Application.Commands.Delete.ById;
-using Users.Api.Application.Commands.Delete.Current;
-using Users.Api.Application.Commands.Update;
-using Users.Api.Application.Commands.UpdateAddress;
-using Users.Api.Application.Queries.Dto;
-using Users.Api.Application.Queries.GetAll;
-using Users.Api.Application.Queries.GetById;
 using Users.Api.Configurations.Authorization;
+using Users.Application.Commands;
+using Users.Application.Commands.Create;
+using Users.Application.Commands.Delete.ById;
+using Users.Application.Commands.Delete.Current;
+using Users.Application.Commands.Update;
+using Users.Application.Commands.UpdateAddress;
+using Users.Application.Queries.Dto;
+using Users.Application.Queries.GetAll;
+using Users.Application.Queries.GetById;
 
 namespace Users.Api.Endpoints;
 
@@ -27,18 +27,18 @@ public static class UserEndpoints
 
         group.MapGet(idSpecifier, GetById)
             .WithName(nameof(GetById))
-            .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
+            .RequireAuthorization(KeycloakConstants.Policies.AdminOnly);
 
         group.MapPost(string.Empty, Create);
 
         group.MapPut(idSpecifier, Update)
-            .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
+            .RequireAuthorization(KeycloakConstants.Policies.AdminOnly);
 
         group.MapPut($"{idSpecifier}/address", UpdateAddress)
-            .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
+            .RequireAuthorization(KeycloakConstants.Policies.AdminOnly);
 
         group.MapDelete(idSpecifier, Delete)
-            .RequireAuthorization(KeycloakConstants.Policies.AdminOrRequestedUser);
+            .RequireAuthorization(KeycloakConstants.Policies.AdminOnly);
 
         var meGroup = group
             .MapGroup("me")

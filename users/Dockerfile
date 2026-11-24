@@ -5,6 +5,7 @@ WORKDIR /source
 COPY ./*.sln ./
 COPY ./Users.Domain/*.csproj ./Users.Domain/
 COPY ./Users.Infrastructure/*.csproj ./Users.Infrastructure/
+COPY ./Users.Application/*.csproj ./Users.Application/
 COPY ./Users.Api/*.csproj ./Users.Api/
 COPY ./Tests/Integration.Tests/*.csproj ./Tests/Integration.Tests/
 RUN dotnet restore ./Users.Api/Users.Api.csproj
@@ -12,6 +13,7 @@ RUN dotnet restore ./Users.Api/Users.Api.csproj
 # Copy everything else and build
 COPY ./Users.Domain/. ./Users.Domain/
 COPY ./Users.Infrastructure/. ./Users.Infrastructure/
+COPY ./Users.Application/. ./Users.Application/
 COPY ./Users.Api/. ./Users.Api/
 COPY ./Tests/Integration.Tests/. ./Tests/Integration.Tests/
 WORKDIR /source/Users.Api
