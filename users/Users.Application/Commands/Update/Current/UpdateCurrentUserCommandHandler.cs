@@ -9,7 +9,7 @@ using Users.Application.Telemetry;
 namespace Users.Application.Commands.Update.Current;
 
 public sealed class UpdateCurrentUserCommandHandler(
-    ICurrentUser currentuser,
+    ICurrentUserService currentuserService,
     IUsersRepository usersRepository,
     ILogger<UpdateCurrentUserCommandHandler> logger) : IRequestHandler<UpdateUserCommand, Unit>
 {
@@ -17,7 +17,7 @@ public sealed class UpdateCurrentUserCommandHandler(
     {
         using var activity = UsersTelemetry.ActivitySource.StartActivity("users.update");
 
-        var authProviderId = currentuser.GetId();
+        var authProviderId = currentuserService.GetId();
 
         try
         {

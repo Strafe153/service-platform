@@ -7,12 +7,12 @@ using Users.Application.Abstractions;
 namespace Users.Application.Queries.GetCurrent;
 
 public sealed class GetCurrentQueryHandler(
-    ICurrentUser currentUser,
+    ICurrentUserService currentUserService,
     IUsersRepository usersRepository) : IRequestHandler<GetCurrentQuery, UserReadDto>
 {
     public async Task<UserReadDto> Handle(GetCurrentQuery request, CancellationToken cancellationToken)
     {
-        var authProviderId = currentUser.GetId();
+        var authProviderId = currentUserService.GetId();
 
         var user = await usersRepository.GetByAuthProviderIdAsync(authProviderId, cancellationToken)
             ?? throw new NullReferenceException($"User with auth provider id {authProviderId} not found.");

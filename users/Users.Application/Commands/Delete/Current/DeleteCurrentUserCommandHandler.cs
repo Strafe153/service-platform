@@ -8,17 +8,17 @@ namespace Users.Application.Commands.Delete.Current;
 public sealed class DeleteCurrentUserCommandHandler
     : DeleteUserCommandHandler, IRequestHandler<DeleteCurrentUserCommand>
 {
-    private readonly ICurrentUser _currentUser;
+    private readonly ICurrentUserService _currentUser;
 
     public DeleteCurrentUserCommandHandler(
-        ICurrentUser currentUser,
+        ICurrentUserService currentUserService,
         IUsersRepository usersRepository,
         IUserService userService,
         IMessagePublisher messagePublisher,
         ILogger<DeleteCurrentUserCommandHandler> logger)
             : base(usersRepository, userService, messagePublisher, logger)
     {
-        _currentUser = currentUser;
+        _currentUser = currentUserService;
     }
 
     public async Task Handle(DeleteCurrentUserCommand request, CancellationToken cancellationToken)
