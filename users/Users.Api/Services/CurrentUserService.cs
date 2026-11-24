@@ -3,7 +3,7 @@ using Users.Application.Abstractions;
 
 namespace Users.Api.Services;
 
-public sealed class CurrentUserService(IHttpContextAccessor contextAccessor) : ICurrentUser
+public sealed class CurrentUserService(IHttpContextAccessor contextAccessor) : ICurrentUserService
 {
     public string GetId()
     {

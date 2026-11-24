@@ -1,6 +1,6 @@
 namespace Users.Application.Abstractions;
 
-public interface ICurrentUser
+public interface ICurrentUserService
 {
     string GetId();
 }
