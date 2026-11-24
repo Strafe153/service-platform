@@ -1,3 +1,5 @@
+using Users.Application.Commands.Create;
+using Users.Application.Models;
 using Users.Application.Queries.Dto;
 using Users.Domain.Aggregates.User;
 
@@ -26,4 +28,7 @@ public static class UserExtensions
 
         return dto;
     }
+
+    public static UserRequest ToUserRequest(this CreateUserCommand command) =>
+        new(command.Email, command.FirstName, command.LastName);
 }

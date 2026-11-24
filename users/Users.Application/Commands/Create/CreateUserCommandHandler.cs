@@ -27,13 +27,7 @@ public sealed class CreateUserCommandHandler(
 
         try
         {
-            UserRequest request = new()
-            {
-                Email = command.Email,
-                FirstName = command.FirstName,
-                LastName = command.LastName,
-            };
-
+            var request = command.ToUserRequest();
             userId = await userService.CreateUserAsync(request, cancellationToken);
 
             await userService.ResetPasswordAsync(userId, command.Password, cancellationToken);
