@@ -22,10 +22,10 @@ public static class MassTransitConfiguration
                    c.Password(options.Password); 
                 });
 
-                cfg.Message<UserCreatedEvent>(c => c.SetEntityName(RabbitMqConstants.Exchanges.User));
+                cfg.Message<UserCreatedEvent>(c => c.SetEntityName(RabbitMqConstants.UserExchange));
                 cfg.Publish<UserCreatedEvent>(c => c.ExchangeType = ExchangeType.Direct);
 
-                cfg.Message<UserDeletedEvent>(c => c.SetEntityName(RabbitMqConstants.Exchanges.User));
+                cfg.Message<UserDeletedEvent>(c => c.SetEntityName(RabbitMqConstants.UserExchange));
                 cfg.Publish<UserDeletedEvent>(c => c.ExchangeType = ExchangeType.Direct);
 
                 cfg.ConfigureEndpoints(context);

@@ -1,5 +1,3 @@
-using Keycloak.AuthServices.Common;
-
 namespace Users.Api.Keycloak;
 
 public static class HttpResponsemessageExtensions
@@ -13,7 +11,7 @@ public static class HttpResponsemessageExtensions
             var keycloakResult = await response.Content
                 .ReadFromJsonAsync<KeycloakErrorResponse>(cancellationToken);
 
-            throw new KeycloakException(keycloakResult?.Error ?? "Keycloak operation failed.");
+            throw new InvalidOperationException(keycloakResult?.Error ?? "Keycloak operation failed.");
         }
     }
 }

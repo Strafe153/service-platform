@@ -1,0 +1,29 @@
+using Users.Application.Queries.Dto;
+using Users.Domain.Aggregates.User;
+
+namespace Users.Application.Mapping;
+
+public static class UserExtensions
+{
+    public static UserReadDto ToReadDto(this User user)
+    {
+        AddressReadDto address = new(
+            user.Address.Country,
+            user.Address.State,
+            user.Address.City,
+            user.Address.ZipCode,
+            user.Address.Street
+        );
+
+        UserReadDto dto = new(
+            user.Id,
+            user.Email,
+            user.FirstName,
+            user.LastName,
+            user.PhoneNumber,
+            user.BirthDate,
+            address);
+
+        return dto;
+    }
+}

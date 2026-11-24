@@ -1,31 +1,34 @@
 using Microsoft.EntityFrameworkCore;
+using Users.Application.Exceptions;
 using Users.Domain.Aggregates.User;
 
 namespace Users.Infrastructure.Repositories;
 
-public class UsersRepository : IUsersRepository
+public class UsersRepository(DatabaseContext context) : IUsersRepository
 {
-    private readonly DatabaseContext _context;
-
-    public UsersRepository(DatabaseContext context)
-    {
-        _context = context;
-    }
-
-    public IQueryable<User> Get() => _context.Users;
+    public IQueryable<User> Get() => context.Users;
 
     public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
-        _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
     public Task<User?> GetByAuthProviderIdAsync(string id, CancellationToken cancellationToken) =>
-        _context.Users.FirstOrDefaultAsync(u => u.AuthProviderId == id, cancellationToken);
+        context.Users.FirstOrDefaultAsync(u => u.AuthProviderId == id, cancellationToken);
 
-    public void Add(User user) => _context.Users.Add(user);
+    public void Add(User user) => context.Users.Add(user);
 
-    public void Update(User user) => _context.Entry(user).State = EntityState.Modified;
+    public void Update(User user) => context.Entry(user).State = EntityState.Modified;
 
-    public void Delete(User user) => _context.Users.Remove(user);
+    public void Delete(User user) => context.Users.Remove(user);
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken) =>
-        _context.SaveChangesAsync(cancellationToken);
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new DatabaseException(ex);
+        }
+    }
 }

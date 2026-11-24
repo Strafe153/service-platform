@@ -2,10 +2,10 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Users.Api.Application.Commands.Create;
-using Users.Api.Application.Commands.Update;
-using Users.Api.Application.Commands.UpdateAddress;
-using Users.Api.Application.Queries.Dto;
+using Users.Application.Commands.Create;
+using Users.Application.Commands.Update;
+using Users.Application.Commands.UpdateAddress;
+using Users.Application.Queries.Dto;
 using Users.Domain.Aggregates.User;
 using Xunit;
 
